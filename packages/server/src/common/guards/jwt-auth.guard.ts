@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 
 /**
  * JWT 认证守卫（占位实现）
@@ -7,9 +7,9 @@ import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    // 占位守卫：暂时放行所有请求
-    // 后续将实现 JWT token 校验逻辑
-    return true;
-  }
+	canActivate(context: ExecutionContext): boolean {
+		// 占位守卫：暂时放行所有请求
+		// 后续将实现 JWT token 校验逻辑
+		return true;
+	}
 }

@@ -1,0 +1,14 @@
+{
+	"endOfLine": "crlf",
+	"embeddedLanguageFormatting": "auto",
+	"htmlWhitespaceSensitivity": "css",
+	"semi": true,
+	"singleQuote": true,
+	"tabWidth": 4,
+	"useTabs": true,
+	"printWidth": 138,
+	"jsxBracketSameLine": false,
+	"singleAttributePerLine": true,
+	"jsxSingleQuote": true,
+	"arrowParens": "avoid"
+}

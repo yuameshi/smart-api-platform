@@ -1,6 +1,6 @@
-import { Module } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { AuthController } from "./auth.controller";
+import { Module } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
 
 /**
  * 认证模块（占位模块）
@@ -9,8 +9,8 @@ import { AuthController } from "./auth.controller";
  * 未来将集成 JWT 认证、数据库用户实体等功能。
  */
 @Module({
-  providers: [AuthService],
-  controllers: [AuthController],
-  exports: [AuthService],
+	providers: [AuthService],
+	controllers: [AuthController],
+	exports: [AuthService],
 })
 export class AuthModule {}

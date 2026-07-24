@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 
 /**
  * 认证服务（占位服务）
@@ -8,11 +8,11 @@ import { Injectable } from "@nestjs/common";
  */
 @Injectable()
 export class AuthService {
-  /**
-   * 返回问候信息
-   * @returns 问候字符串
-   */
-  hello(): string {
-    return "Hello from Auth Service!";
-  }
+	/**
+	 * 返回问候信息
+	 * @returns 问候字符串
+	 */
+	hello(): string {
+		return 'Hello from Auth Service!';
+	}
 }
