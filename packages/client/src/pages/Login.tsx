@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 import {
   Box,
   Container,
@@ -7,9 +7,8 @@ import {
   Typography,
   TextField,
   Button,
-  Alert,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 // 登录表单数据类型
 interface LoginFormData {
@@ -33,18 +32,18 @@ export default function Login() {
 
   // 表单提交处理
   const onSubmit = (data: LoginFormData) => {
-    console.log('登录信息:', data);
-    navigate('/');
+    console.log("登录信息:", data);
+    navigate("/");
   };
 
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#f5f5f5',
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f5f5f5",
       }}
     >
       <Container maxWidth="sm">
@@ -59,7 +58,7 @@ export default function Login() {
             <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
               {/* 用户名输入框 */}
               <TextField
-                {...register('username', { required: '请输入用户名' })}
+                {...register("username", { required: "请输入用户名" })}
                 label="用户名"
                 fullWidth
                 margin="normal"
@@ -71,7 +70,7 @@ export default function Login() {
 
               {/* 密码输入框 */}
               <TextField
-                {...register('password', { required: '请输入密码' })}
+                {...register("password", { required: "请输入密码" })}
                 label="密码"
                 type="password"
                 fullWidth
