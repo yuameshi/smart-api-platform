@@ -8,7 +8,7 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 // 登录表单数据类型
 interface LoginFormData {
