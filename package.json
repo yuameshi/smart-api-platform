@@ -1,0 +1,19 @@
+{
+  "name": "smart-api-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "融合 AIGC 的 API 交付链路自动化平台",
+  "scripts": {
+    "dev:server": "pnpm --filter server start:dev",
+    "dev:client": "pnpm --filter client dev",
+    "build:server": "pnpm --filter server build",
+    "build:client": "pnpm --filter client build",
+    "test:server": "pnpm --filter server test",
+    "lint:server": "pnpm --filter server lint",
+    "lint:client": "pnpm --filter client lint"
+  },
+  "engines": {
+    "node": ">= 20",
+    "pnpm": ">= 8.0"
+  }
+}
