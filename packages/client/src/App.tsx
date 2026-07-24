@@ -1,32 +1,44 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router';
-import Login from './pages/Login';
-import Home from './pages/Home';
+import PageLoading from '@/utils/PageLoading';
+import RequireAuth from '@/components/RequireAuth';
+import GuestGuard from '@/components/GuestGuard';
 
-// 应用根组件，配置前端路由
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+
 function App() {
 	return (
-		<Routes>
-			{/* 首页路由 */}
-			<Route
-				path='/'
-				element={<Home />}
-			/>
-			{/* 登录页路由 */}
-			<Route
-				path='/login'
-				element={<Login />}
-			/>
-			{/* 未匹配路由默认跳转到登录页 */}
-			<Route
-				path='*'
-				element={
-					<Navigate
-						to='/login'
-						replace
+		<Suspense fallback={<PageLoading />}>
+			<Routes>
+				<Route element={<RequireAuth />}>
+					<Route
+						path='/'
+						element={<Home />}
 					/>
-				}
-			/>
-		</Routes>
+				</Route>
+				<Route element={<GuestGuard />}>
+					<Route
+						path='/login'
+						element={<Login />}
+					/>
+					<Route
+						path='/register'
+						element={<Register />}
+					/>
+				</Route>
+				<Route
+					path='*'
+					element={
+						<Navigate
+							to='/login'
+							replace
+						/>
+					}
+				/>
+			</Routes>
+		</Suspense>
 	);
 }
 
