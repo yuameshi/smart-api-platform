@@ -1,13 +1,14 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 /**
- * HTTP 异常过滤器
- * 捕获所有 HttpException 异常，返回统一格式的 JSON 错误响应
- * 响应格式: { statusCode, message, timestamp, path }
+ * 捕获所有HttpException异常，返回统一错误响应
+ * { code, data: null, message, timestamp, path }
  */
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
+	private readonly logger = new Logger(HttpExceptionFilter.name);
+
 	catch(exception: HttpException, host: ArgumentsHost) {
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
@@ -19,8 +20,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		const message =
 			typeof exceptionResponse === 'string' ? exceptionResponse : (exceptionResponse as any).message || exception.message;
 
+		// 分级日志: 5xx 用 error (含 stack), 4xx 用 warn
+		if (statusCode >= 500) {
+			this.logger.error(`${request.method} ${request.url} -> ${statusCode}: ${message}`, exception.stack);
+		} else {
+			this.logger.warn(`${request.method} ${request.url} -> ${statusCode}: ${message}`);
+		}
+
 		response.status(statusCode).json({
-			statusCode,
+			code: statusCode,
+			data: null,
 			message,
 			timestamp: new Date().toISOString(),
 			path: request.url,

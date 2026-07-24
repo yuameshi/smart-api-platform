@@ -1,30 +1,40 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { databaseConfig } from './config/database.config';
+import appConfig from './config/app.config';
+import databaseConfig from './config/database.config';
+import jwtConfig from './config/jwt.config';
+import { CoreModule } from './common/core/core.module';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 /**
  * 应用根模块
- * 负责加载全局配置、数据库连接和业务模块
+ * 负责加载全局配置、数据库连接、核心基础设施和业务模块
  */
 @Module({
 	imports: [
-		// 全局配置模块，加载 .env 文件
+		// 全局核心模块
+		CoreModule,
+		// 加载 .env 文件
 		ConfigModule.forRoot({
 			isGlobal: true,
-			envFilePath: '.env',
+			load: [appConfig, databaseConfig, jwtConfig],
+			envFilePath: ['.env', '.env.example'],
 		}),
-		// TypeORM 数据库连接，使用异步配置工厂
+		// TypeORM
 		TypeOrmModule.forRootAsync({
-			imports: [ConfigModule],
-			inject: [ConfigService],
-			useFactory: (configService: ConfigService) => databaseConfig(configService),
+			useFactory: (dbConfig: Record<string, unknown>) => dbConfig,
+			inject: [databaseConfig.KEY],
 		}),
 		// 业务模块
 		UserModule,
 		AuthModule,
 	],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer.apply(LoggerMiddleware).forRoutes('*');
+	}
+}
