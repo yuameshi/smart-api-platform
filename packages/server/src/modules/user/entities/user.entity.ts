@@ -39,6 +39,20 @@ export class User {
 	password: string;
 
 	/**
+	 * 是否管理员
+	 * 默认为 false，普通用户
+	 */
+	@Column({ default: false })
+	isAdmin: boolean;
+
+	/**
+	 * 是否激活
+	 * 默认为 true，用户创建后自动激活
+	 */
+	@Column({ default: true })
+	isActive: boolean;
+
+	/**
 	 * 创建时间
 	 * 记录用户注册的时间，由 TypeORM 自动设置
 	 */
