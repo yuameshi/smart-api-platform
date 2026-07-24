@@ -34,3 +34,9 @@ coverage/
 # 临时文件
 *.tmp
 .temp/
+
+# TypeScript 构建信息
+*.tsbuildinfo
+
+# Vite 配置声明文件
+packages/client/vite.config.d.ts
