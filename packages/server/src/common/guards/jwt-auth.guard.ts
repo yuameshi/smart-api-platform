@@ -1,15 +1,36 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core';
+import { Request } from 'express';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
-/**
- * JWT 认证守卫（占位实现）
- * 当前始终返回 true，允许所有请求通过
- * TODO: 后续接入真实的 JWT 认证逻辑，验证 token 有效性
- */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-	canActivate(context: ExecutionContext): boolean {
-		// 占位守卫：暂时放行所有请求
-		// 后续将实现 JWT token 校验逻辑
+	constructor(
+		private readonly jwtService: JwtService,
+		private readonly reflector: Reflector,
+	) {}
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		// 标记公开访问跳过认证
+		const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
+		if (isPublic) {
+			return true;
+		}
+
+		const request = context.switchToHttp().getRequest<Request>();
+		const token = request.headers.authorization?.replace('Bearer ', '');
+		if (!token) {
+			throw new UnauthorizedException('未提供认证令牌');
+		}
+
+		try {
+			const payload = await this.jwtService.verifyAsync(token);
+			(request as any).user = payload;
+		} catch {
+			throw new UnauthorizedException('认证令牌无效或已过期');
+		}
+
 		return true;
 	}
 }

@@ -1,22 +1,23 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Public } from '@/common/decorators/public.decorator';
 import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
-/**
- * 认证控制器（占位控制器）
- *
- * 当前仅提供测试路由，用于验证模块是否正常加载。
- * 未来将添加登录、注册、获取令牌等接口。
- */
 @Controller('auth')
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
-	/**
-	 * 测试路由 — 验证认证服务是否正常工作
-	 * GET /auth/hello
-	 */
-	@Get('hello')
-	hello() {
-		return { message: this.authService.hello() };
+	@Public()
+	@Post('register')
+	register(@Body() dto: RegisterDto) {
+		return this.authService.register(dto);
+	}
+
+	@Public()
+	@Post('login')
+	@HttpCode(200)
+	login(@Body() dto: LoginDto) {
+		return this.authService.login(dto);
 	}
 }
