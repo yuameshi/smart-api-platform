@@ -2,25 +2,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
-/**
- * 用户控制器单元测试
- * 测试 UserController 中各路由处理函数是否正确调用服务层方法
- * 使用 Jest 测试框架，通过模拟 Service 来隔离业务逻辑依赖
- */
+// 用户控制器单元测试
 describe('UserController', () => {
 	let controller: UserController;
 	let service: jest.Mocked<UserService>;
 
-	/**
-	 * 每个测试用例执行前的准备工作
-	 * 创建测试模块并模拟用户服务
-	 */
 	beforeEach(async () => {
 		const mockService = {
-			hello: jest.fn(),
 			findAll: jest.fn(),
 			findOne: jest.fn(),
 			create: jest.fn(),
+			update: jest.fn(),
+			delete: jest.fn(),
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -37,30 +30,12 @@ describe('UserController', () => {
 		service = module.get(UserService);
 	});
 
-	/**
-	 * 测试控制器是否能够正确初始化
-	 */
+	// 测试控制器是否能够正确初始化
 	it('应该被正确初始化', () => {
 		expect(controller).toBeDefined();
 	});
 
-	/**
-	 * 测试 GET /user/hello 路由是否返回正确的响应
-	 */
-	describe('GET /user/hello', () => {
-		it('应该返回包含欢迎信息的 JSON 对象', () => {
-			service.hello.mockReturnValue('Hello from User Service!');
-
-			const result = controller.hello();
-
-			expect(result).toEqual({ message: 'Hello from User Service!' });
-			expect(service.hello).toHaveBeenCalledTimes(1);
-		});
-	});
-
-	/**
-	 * 测试 GET /user 路由是否返回用户列表
-	 */
+	// 测试用户列表
 	describe('GET /user', () => {
 		it('应该返回所有用户列表', async () => {
 			const mockUsers = [
@@ -69,10 +44,12 @@ describe('UserController', () => {
 					username: 'testuser',
 					email: 'test@example.com',
 					password: 'hashed_password',
+					isAdmin: false,
+					isActive: true,
 					createdAt: new Date(),
 				},
 			];
-			service.findAll.mockResolvedValue(mockUsers);
+			service.findAll.mockResolvedValue(mockUsers as any);
 
 			const result = await controller.findAll();
 
@@ -81,9 +58,7 @@ describe('UserController', () => {
 		});
 	});
 
-	/**
-	 * 测试 GET /user/:id 路由是否返回单个用户
-	 */
+	// 测试获取单个用户
 	describe('GET /user/:id', () => {
 		it('应该根据 ID 返回对应用户', async () => {
 			const mockUser = {
@@ -91,20 +66,20 @@ describe('UserController', () => {
 				username: 'testuser',
 				email: 'test@example.com',
 				password: 'hashed_password',
+				isAdmin: false,
+				isActive: true,
 				createdAt: new Date(),
 			};
-			service.findOne.mockResolvedValue(mockUser);
+			service.findOne.mockResolvedValue(mockUser as any);
 
-			const result = await controller.findOne('1');
+			const result = await controller.findOne(1);
 
 			expect(result).toEqual(mockUser);
 			expect(service.findOne).toHaveBeenCalledWith(1);
 		});
 	});
 
-	/**
-	 * 测试 POST /user 路由是否正确创建用户
-	 */
+	// 测试创建用户
 	describe('POST /user', () => {
 		it('应该创建并返回新用户', async () => {
 			const createData = {
@@ -123,6 +98,53 @@ describe('UserController', () => {
 
 			expect(result).toEqual(mockCreatedUser);
 			expect(service.create).toHaveBeenCalledWith(createData);
+		});
+	});
+
+	// 测试修改用户
+	describe('PATCH /user/:id', () => {
+		it('应该调用 userService.update 更新用户信息', async () => {
+			const updateData = {
+				username: 'updateduser',
+				email: 'updated@example.com',
+			};
+			service.update.mockResolvedValue(undefined);
+
+			await controller.update(1, updateData);
+
+			expect(service.update).toHaveBeenCalledWith(1, updateData);
+			expect(service.update).toHaveBeenCalledTimes(1);
+		});
+
+		it('应该能够更新部分字段', async () => {
+			const updateData = {
+				isActive: false,
+			};
+			service.update.mockResolvedValue(undefined);
+
+			await controller.update(2, updateData);
+
+			expect(service.update).toHaveBeenCalledWith(2, { isActive: false });
+		});
+	});
+
+	// 测试删除用户
+	describe('DELETE /user/:id', () => {
+		it('应该调用 userService.delete 删除用户', async () => {
+			service.delete.mockResolvedValue(undefined);
+
+			await controller.remove(1);
+
+			expect(service.delete).toHaveBeenCalledWith(1);
+			expect(service.delete).toHaveBeenCalledTimes(1);
+		});
+
+		it('应该能够删除指定 ID 的用户', async () => {
+			service.delete.mockResolvedValue(undefined);
+
+			await controller.remove(999);
+
+			expect(service.delete).toHaveBeenCalledWith(999);
 		});
 	});
 });

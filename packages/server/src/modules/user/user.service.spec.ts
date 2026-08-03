@@ -4,24 +4,18 @@ import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 
-/**
- * 用户服务单元测试
- * 测试 UserService 中各方法的业务逻辑是否正确
- * 使用 Jest 测试框架，通过模拟 Repository 来隔离数据库依赖
- */
+// 用户服务单元测试
 describe('UserService', () => {
 	let service: UserService;
 	let repository: jest.Mocked<Repository<User>>;
 
-	/**
-	 * 每个测试用例执行前的准备工作
-	 * 创建测试模块并模拟数据库仓库
-	 */
 	beforeEach(async () => {
 		const mockRepository = {
 			find: jest.fn(),
 			findOneBy: jest.fn(),
 			save: jest.fn(),
+			update: jest.fn(),
+			delete: jest.fn(),
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -38,26 +32,11 @@ describe('UserService', () => {
 		repository = module.get(getRepositoryToken(User));
 	});
 
-	/**
-	 * 测试服务是否能够正确初始化
-	 */
+	// 测试服务是否能够正确初始化
 	it('应该被正确初始化', () => {
 		expect(service).toBeDefined();
 	});
 
-	/**
-	 * 测试 hello 方法是否返回正确的欢迎信息
-	 */
-	describe('hello', () => {
-		it('应该返回正确的欢迎信息', () => {
-			const result = service.hello();
-			expect(result).toBe('Hello from User Service!');
-		});
-	});
-
-	/**
-	 * 测试 findAll 方法是否能够正确查询所有用户
-	 */
 	describe('findAll', () => {
 		it('应该返回用户列表', async () => {
 			const mockUsers: User[] = [
@@ -66,6 +45,8 @@ describe('UserService', () => {
 					username: 'testuser',
 					email: 'test@example.com',
 					password: 'hashed_password',
+					isAdmin: false,
+					isActive: true,
 					createdAt: new Date(),
 				},
 			];
@@ -73,7 +54,16 @@ describe('UserService', () => {
 
 			const result = await service.findAll();
 
-			expect(result).toEqual(mockUsers);
+			expect(result).toEqual([
+				{
+					id: 1,
+					username: 'testuser',
+					email: 'test@example.com',
+					isAdmin: false,
+					isActive: true,
+					createdAt: expect.any(Date),
+				},
+			]);
 			expect(repository.find).toHaveBeenCalledTimes(1);
 		});
 
@@ -86,9 +76,6 @@ describe('UserService', () => {
 		});
 	});
 
-	/**
-	 * 测试 findOne 方法是否能够根据 ID 查询用户
-	 */
 	describe('findOne', () => {
 		it('应该根据 ID 返回对应用户', async () => {
 			const mockUser: User = {
@@ -96,13 +83,22 @@ describe('UserService', () => {
 				username: 'testuser',
 				email: 'test@example.com',
 				password: 'hashed_password',
+				isAdmin: false,
+				isActive: true,
 				createdAt: new Date(),
 			};
 			repository.findOneBy.mockResolvedValue(mockUser);
 
 			const result = await service.findOne(1);
 
-			expect(result).toEqual(mockUser);
+			expect(result).toEqual({
+				id: 1,
+				username: 'testuser',
+				email: 'test@example.com',
+				isAdmin: false,
+				isActive: true,
+				createdAt: expect.any(Date),
+			});
 			expect(repository.findOneBy).toHaveBeenCalledWith({ id: 1 });
 		});
 
@@ -115,9 +111,63 @@ describe('UserService', () => {
 		});
 	});
 
-	/**
-	 * 测试 create 方法是否能够正确创建用户
-	 */
+	describe('findByUsername', () => {
+		it('应该根据用户名返回对应用户', async () => {
+			const mockUser: User = {
+				id: 1,
+				username: 'testuser',
+				email: 'test@example.com',
+				password: 'hashed_password',
+				isAdmin: false,
+				isActive: true,
+				createdAt: new Date(),
+			};
+			repository.findOneBy.mockResolvedValue(mockUser);
+
+			const result = await service.findByUsername('testuser');
+
+			expect(result).toEqual(mockUser);
+			expect(repository.findOneBy).toHaveBeenCalledWith({ username: 'testuser' });
+		});
+
+		it('用户名不存在时应返回 null', async () => {
+			repository.findOneBy.mockResolvedValue(null);
+
+			const result = await service.findByUsername('nonexistent');
+
+			expect(result).toBeNull();
+		});
+	});
+
+	describe('findByEmail', () => {
+		it('应该根据邮箱返回对应用户', async () => {
+			const mockUser: User = {
+				id: 1,
+				username: 'testuser',
+				email: 'test@example.com',
+				password: 'hashed_password',
+				isAdmin: false,
+				isActive: true,
+				createdAt: new Date(),
+			};
+			repository.findOneBy.mockResolvedValue(mockUser);
+
+			const result = await service.findByEmail('test@example.com');
+
+			expect(result).toEqual(mockUser);
+			expect(repository.findOneBy).toHaveBeenCalledWith({ email: 'test@example.com' });
+		});
+
+		it('邮箱不存在时应返回 null', async () => {
+			repository.findOneBy.mockResolvedValue(null);
+
+			const result = await service.findByEmail('nonexistent@example.com');
+
+			expect(result).toBeNull();
+		});
+	});
+
+	// 测试新建用户
 	describe('create', () => {
 		it('应该创建并返回新用户', async () => {
 			const createData = {
@@ -128,14 +178,70 @@ describe('UserService', () => {
 			const mockCreatedUser: User = {
 				id: 1,
 				...createData,
+				isAdmin: false,
+				isActive: true,
 				createdAt: new Date(),
 			};
 			repository.save.mockResolvedValue(mockCreatedUser);
 
 			const result = await service.create(createData);
 
-			expect(result).toEqual(mockCreatedUser);
+			expect(result).toEqual({
+				id: 1,
+				username: 'newuser',
+				email: 'new@example.com',
+				isAdmin: false,
+				isActive: true,
+				createdAt: expect.any(Date),
+			});
 			expect(repository.save).toHaveBeenCalledWith(createData);
+		});
+	});
+
+	// 测试修改用户信息
+	describe('update', () => {
+		it('应该调用 repository.update 更新用户信息', async () => {
+			const updateData = {
+				username: 'updateduser',
+				email: 'updated@example.com',
+			};
+			repository.update.mockResolvedValue(undefined as any);
+
+			await service.update(1, updateData);
+
+			expect(repository.update).toHaveBeenCalledWith(1, updateData);
+			expect(repository.update).toHaveBeenCalledTimes(1);
+		});
+
+		it('应该能够更新部分字段', async () => {
+			const updateData = {
+				isActive: false,
+			};
+			repository.update.mockResolvedValue(undefined as any);
+
+			await service.update(1, updateData);
+
+			expect(repository.update).toHaveBeenCalledWith(1, { isActive: false });
+		});
+	});
+
+	// 测试删除用户
+	describe('delete', () => {
+		it('应该调用 repository.delete 删除用户', async () => {
+			repository.delete.mockResolvedValue(undefined as any);
+
+			await service.delete(1);
+
+			expect(repository.delete).toHaveBeenCalledWith(1);
+			expect(repository.delete).toHaveBeenCalledTimes(1);
+		});
+
+		it('应该能够删除指定 ID 的用户', async () => {
+			repository.delete.mockResolvedValue(undefined as any);
+
+			await service.delete(999);
+
+			expect(repository.delete).toHaveBeenCalledWith(999);
 		});
 	});
 });
