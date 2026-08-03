@@ -63,6 +63,7 @@ describe('注册登录E2E测试', () => {
 			expect(body.data.user.username).toBe('e2euser');
 			expect(body.data.user.email).toBe('e2e@example.com');
 			expect(body.data.user.password).toBeUndefined();
+			expect(body.data.user.createdAt).toEqual(expect.any(String));
 
 			userId = body.data.user.id;
 		});
@@ -110,6 +111,8 @@ describe('注册登录E2E测试', () => {
 			expect(body.data.access_token).toBeDefined();
 			expect(body.data.user).toBeDefined();
 			expect(body.data.user.username).toBe('e2euser');
+			expect(body.data.user.isAdmin).toBeDefined();
+			expect(body.data.user.createdAt).toEqual(expect.any(String));
 
 			// 验证 JWT payload 中包含 isAdmin 声明
 			const payload = decodeJwtPayload(body.data.access_token);

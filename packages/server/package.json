@@ -28,6 +28,7 @@
 		"mysql2": "^3.23.2",
 		"reflect-metadata": "^0.2.2",
 		"rxjs": "^7.8.2",
+		"shared": "workspace:*",
 		"typeorm": "^1.1.0"
 	},
 	"devDependencies": {

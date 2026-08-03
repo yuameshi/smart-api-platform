@@ -5,6 +5,7 @@ import { useNavigate, Link as RouterLink } from 'react-router';
 import { Alert, Box, Button, Card, CardContent, CircularProgress, Container, Link, TextField, Typography } from '@mui/material';
 
 import api from '@/services/api';
+import type { AuthResponse } from 'shared';
 import { tokenAtom } from '@/atoms/token';
 import { userAtom } from '@/atoms/user';
 import { Layout } from '@/components/Layout';
@@ -41,7 +42,7 @@ export default function Register() {
 				username: data.username,
 				email: data.email,
 				password: data.password,
-			})) as { access_token?: string; user: UserBrief };
+			})) as AuthResponse;
 
 			setToken(res.access_token);
 			setUser(res.user);

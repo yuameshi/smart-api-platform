@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
@@ -37,6 +38,32 @@ describe('UserService', () => {
 		expect(service).toBeDefined();
 	});
 
+	describe('toPublicUser', () => {
+		it('应映射为对外用户对象', () => {
+			const user = {
+				id: 1,
+				username: 'testuser',
+				email: 'test@example.com',
+				password: 'hashed_password',
+				isAdmin: false,
+				isActive: true,
+				createdAt: new Date('2026-08-03T00:00:00.000Z'),
+			};
+
+			const result = service.toPublicUser(user);
+
+			expect(result).toEqual({
+				id: 1,
+				username: 'testuser',
+				email: 'test@example.com',
+				isAdmin: false,
+				isActive: true,
+				createdAt: '2026-08-03T00:00:00.000Z',
+			});
+			expect(result).not.toHaveProperty('password');
+		});
+	});
+
 	describe('findAll', () => {
 		it('应该返回用户列表', async () => {
 			const mockUsers: User[] = [
@@ -61,7 +88,7 @@ describe('UserService', () => {
 					email: 'test@example.com',
 					isAdmin: false,
 					isActive: true,
-					createdAt: expect.any(Date),
+					createdAt: expect.any(String),
 				},
 			]);
 			expect(repository.find).toHaveBeenCalledTimes(1);
@@ -97,7 +124,7 @@ describe('UserService', () => {
 				email: 'test@example.com',
 				isAdmin: false,
 				isActive: true,
-				createdAt: expect.any(Date),
+				createdAt: expect.any(String),
 			});
 			expect(repository.findOneBy).toHaveBeenCalledWith({ id: 1 });
 		});
@@ -126,7 +153,15 @@ describe('UserService', () => {
 
 			const result = await service.findByUsername('testuser');
 
-			expect(result).toEqual(mockUser);
+			expect(result).toEqual({
+				id: 1,
+				username: 'testuser',
+				email: 'test@example.com',
+				isAdmin: false,
+				isActive: true,
+				createdAt: expect.any(String),
+			});
+			expect(result).not.toHaveProperty('password');
 			expect(repository.findOneBy).toHaveBeenCalledWith({ username: 'testuser' });
 		});
 
@@ -154,7 +189,15 @@ describe('UserService', () => {
 
 			const result = await service.findByEmail('test@example.com');
 
-			expect(result).toEqual(mockUser);
+			expect(result).toEqual({
+				id: 1,
+				username: 'testuser',
+				email: 'test@example.com',
+				isAdmin: false,
+				isActive: true,
+				createdAt: expect.any(String),
+			});
+			expect(result).not.toHaveProperty('password');
 			expect(repository.findOneBy).toHaveBeenCalledWith({ email: 'test@example.com' });
 		});
 
@@ -169,20 +212,21 @@ describe('UserService', () => {
 
 	// 测试新建用户
 	describe('create', () => {
-		it('应该创建并返回新用户', async () => {
+		it('应该创建并返回新用户，密码以 bcrypt 哈希后入库', async () => {
 			const createData = {
 				username: 'newuser',
 				email: 'new@example.com',
 				password: 'password123',
 			};
-			const mockCreatedUser: User = {
+			repository.save.mockResolvedValue({
 				id: 1,
-				...createData,
+				username: 'newuser',
+				email: 'new@example.com',
+				password: 'some_hashed_value',
 				isAdmin: false,
 				isActive: true,
 				createdAt: new Date(),
-			};
-			repository.save.mockResolvedValue(mockCreatedUser);
+			} as User);
 
 			const result = await service.create(createData);
 
@@ -192,9 +236,23 @@ describe('UserService', () => {
 				email: 'new@example.com',
 				isAdmin: false,
 				isActive: true,
-				createdAt: expect.any(Date),
+				createdAt: expect.any(String),
 			});
-			expect(repository.save).toHaveBeenCalledWith(createData);
+			expect(repository.save).toHaveBeenCalledTimes(1);
+			const savedData = repository.save.mock.calls[0][0] as Partial<User>;
+			expect(savedData.password).not.toBe('password123');
+			expect(savedData.password).toMatch(/^\$2[ayb]\$/);
+		});
+
+		it('未提供密码时应抛出 BadRequestException 且不保存', async () => {
+			const createData = {
+				username: 'nopassuser',
+				email: 'nopass@example.com',
+			};
+
+			await expect(service.create(createData)).rejects.toThrow(BadRequestException);
+			await expect(service.create(createData)).rejects.toThrow('密码不能为空');
+			expect(repository.save).not.toHaveBeenCalled();
 		});
 	});
 

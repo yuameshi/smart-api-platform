@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Box, Container, Card, CardContent, Typography, TextField, Button, Alert, Link as MuiLink } from '@mui/material';
 import { Link, useNavigate } from 'react-router';
 import { useSetAtom } from 'jotai';
+import type { AuthResponse } from 'shared';
 import api from '@/services/api';
 import { tokenAtom } from '@/atoms/token';
 import { userAtom } from '@/atoms/user';
@@ -35,7 +36,7 @@ export default function Login() {
 			const res = (await api.post('/auth/login', {
 				username: data.username,
 				password: data.password,
-			})) as LoginResponse;
+			})) as AuthResponse;
 
 			setToken(res.access_token);
 			setUser(res.user);

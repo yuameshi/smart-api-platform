@@ -1,6 +1,7 @@
 import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
+import type { UpdateUserRequest } from 'shared';
 
-export class UpdateUserDto {
+export class UpdateUserDto implements UpdateUserRequest {
 	@IsOptional()
 	@IsString()
 	username?: string;

@@ -16,6 +16,17 @@ describe('AuthService', () => {
 			findByUsername: jest.fn(),
 			findByEmail: jest.fn(),
 			create: jest.fn(),
+			dangerouslyGetFullUserObjectById: jest.fn(),
+			toPublicUser: jest.fn(
+				(user: { id: number; username: string; email: string; isAdmin: boolean; isActive: boolean; createdAt: Date }) => ({
+					id: user.id,
+					username: user.username,
+					email: user.email,
+					isAdmin: user.isAdmin,
+					isActive: user.isActive,
+					createdAt: user.createdAt.toISOString(),
+				}),
+			),
 		};
 
 		const mockJwtService = {
@@ -62,12 +73,9 @@ describe('AuthService', () => {
 				email: 'new@example.com',
 				isAdmin: false,
 				isActive: true,
-				createdAt: new Date(),
+				createdAt: new Date().toISOString(),
 			} as any);
 			jwtService.sign.mockReturnValue(mockToken);
-
-			// Mock bcrypt.hash
-			jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed_password' as never);
 
 			const result = await service.register(registerDto);
 
@@ -79,7 +87,7 @@ describe('AuthService', () => {
 					email: 'new@example.com',
 					isAdmin: false,
 					isActive: true,
-					createdAt: expect.any(Date),
+					createdAt: expect.any(String),
 				},
 			});
 			expect(userService.findByUsername).toHaveBeenCalledWith('newuser');
@@ -87,7 +95,7 @@ describe('AuthService', () => {
 			expect(userService.create).toHaveBeenCalledWith({
 				username: 'newuser',
 				email: 'new@example.com',
-				password: 'hashed_password',
+				password: 'password123',
 			});
 			expect(jwtService.sign).toHaveBeenCalledWith({
 				sub: 1,
@@ -156,6 +164,7 @@ describe('AuthService', () => {
 			const mockToken = 'mock_jwt_token';
 
 			userService.findByUsername.mockResolvedValue(mockUser as any);
+			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser as any);
 			jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 			jwtService.sign.mockReturnValue(mockToken);
 
@@ -169,7 +178,7 @@ describe('AuthService', () => {
 					email: 'test@example.com',
 					isAdmin: false,
 					isActive: true,
-					createdAt: expect.any(Date),
+					createdAt: expect.any(String),
 				},
 			});
 			expect(jwtService.sign).toHaveBeenCalledWith({
@@ -191,9 +200,11 @@ describe('AuthService', () => {
 				password: 'hashed_password',
 				isAdmin: false,
 				isActive: false,
+				createdAt: new Date(),
 			};
 
 			userService.findByUsername.mockResolvedValue(mockUser as any);
+			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser as any);
 			jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
 			await expect(service.login(loginDto)).rejects.toThrow(ForbiddenException);
@@ -226,6 +237,7 @@ describe('AuthService', () => {
 			};
 
 			userService.findByUsername.mockResolvedValue(mockUser as any);
+			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser as any);
 			jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
 			await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);

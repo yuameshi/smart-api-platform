@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
+import type { JwtPayload } from 'shared';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
@@ -25,8 +26,8 @@ export class JwtAuthGuard implements CanActivate {
 		}
 
 		try {
-			const payload = await this.jwtService.verifyAsync(token);
-			(request as any).user = payload;
+			const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
+			(request as Request & { user: JwtPayload }).user = payload;
 		} catch {
 			throw new UnauthorizedException('认证令牌无效或已过期');
 		}

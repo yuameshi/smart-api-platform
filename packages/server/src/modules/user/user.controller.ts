@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { AdminGuard } from '@/common/guards/admin.guard';
 import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 
 /**
  * /user
@@ -17,6 +17,7 @@ export class UserController {
 	 * 获取系统中所有已注册的用户列表
 	 * 返回用户列表的 JSON 数组
 	 */
+	@UseGuards(AdminGuard)
 	@Get()
 	findAll() {
 		return this.userService.findAll();
@@ -37,7 +38,7 @@ export class UserController {
 	 */
 	@UseGuards(AdminGuard)
 	@Post()
-	create(@Body() body: Partial<User>) {
+	create(@Body() body: CreateUserDto) {
 		return this.userService.create(body);
 	}
 

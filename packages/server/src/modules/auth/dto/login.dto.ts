@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
+import type { LoginRequest } from 'shared';
 
-export class LoginDto {
+export class LoginDto implements LoginRequest {
 	@IsString()
 	@IsNotEmpty()
 	username!: string;
