@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntP
 import { AdminGuard } from '@/common/guards/admin.guard';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 
 /**
  * /user
@@ -36,7 +37,7 @@ export class UserController {
 	 */
 	@UseGuards(AdminGuard)
 	@Post()
-	create(@Body() body: Partial<any>) {
+	create(@Body() body: Partial<User>) {
 		return this.userService.create(body);
 	}
 

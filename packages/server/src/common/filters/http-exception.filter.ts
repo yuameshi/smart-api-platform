@@ -17,8 +17,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		const exceptionResponse = exception.getResponse();
 
 		// 提取错误消息，兼容字符串和对象格式
-		const message =
-			typeof exceptionResponse === 'string' ? exceptionResponse : (exceptionResponse as any).message || exception.message;
+		const msg = (exceptionResponse as Record<string, unknown>)?.message;
+		const message = typeof exceptionResponse === 'string' ? exceptionResponse : typeof msg === 'string' ? msg : exception.message;
 
 		// 分级日志: 5xx 用 error (含 stack), 4xx 用 warn
 		if (statusCode >= 500) {

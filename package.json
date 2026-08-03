@@ -2,18 +2,34 @@
 	"name": "smart-api-platform",
 	"version": "1.0.0",
 	"private": true,
-	"description": "融合 AIGC 的 API 交付链路自动化平台",
+	"description": "",
 	"scripts": {
-		"dev:server": "pnpm --filter server start:dev",
+		"preinstall": "npx only-allow pnpm",
+		"dev": "pnpm -parallel --filter server --filter client run dev",
+		"dev:server": "pnpm --filter server dev",
 		"dev:client": "pnpm --filter client dev",
+		"build": "pnpm -r build",
 		"build:server": "pnpm --filter server build",
 		"build:client": "pnpm --filter client build",
 		"test:server": "pnpm --filter server test",
+		"lint": "pnpm --parallel --filter server --filter client run lint",
 		"lint:server": "pnpm --filter server lint",
-		"lint:client": "pnpm --filter client lint"
+		"lint:client": "pnpm --filter client lint",
+		"format": "prettier --write \"packages/*/src/**/*.{ts,tsx}\" \"packages/*/package.json\" \"package.json\" \"*.{md,yaml}\""
 	},
 	"engines": {
 		"node": ">= 20",
 		"pnpm": ">= 8.0"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"eslint": "^10.8.0",
+		"eslint-plugin-react-hooks": "^7.1.1",
+		"eslint-plugin-react-refresh": "^0.5.3",
+		"globals": "^17.8.0",
+		"only-allow": "^1.2.2",
+		"prettier": "^3.9.6",
+		"typescript": "5.9.3",
+		"typescript-eslint": "^8.65.0"
 	}
 }
