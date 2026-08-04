@@ -21,6 +21,7 @@ import { UserModule } from '../user/user.module';
 			useFactory: (config: ConfigService): JwtModuleOptions => ({
 				secret: config.get<string>('jwt.secret'),
 				signOptions: {
+					algorithm: config.get<string>('jwt.algorithm', 'HS256') as 'HS256',
 					expiresIn: config.get<string>('jwt.expiresIn', '7d') as `${number}${'s' | 'm' | 'h' | 'd' | 'w' | 'y' | 'ms'}`,
 				},
 			}),
