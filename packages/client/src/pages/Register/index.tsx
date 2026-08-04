@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useSetAtom } from 'jotai';
 import { useNavigate, Link as RouterLink } from 'react-router';
 import { Alert, Box, Button, Card, CardContent, CircularProgress, Container, Link, TextField, Typography } from '@mui/material';
@@ -28,11 +28,11 @@ export default function Register() {
 	const {
 		register,
 		handleSubmit,
-		watch,
+		control,
 		formState: { errors },
 	} = useForm<RegisterFormData>();
 
-	const password = watch('password');
+	const password = useWatch({ control, name: 'password' });
 
 	const onSubmit = async (data: RegisterFormData) => {
 		setLoading(true);

@@ -264,7 +264,7 @@ describe('UserService', () => {
 				username: 'updateduser',
 				email: 'updated@example.com',
 			};
-			repository.update.mockResolvedValue(undefined as any);
+			repository.update.mockResolvedValue({ affected: 1, raw: {}, generatedMaps: [] });
 
 			await service.update(1, updateData);
 
@@ -276,7 +276,7 @@ describe('UserService', () => {
 			const updateData = {
 				isActive: false,
 			};
-			repository.update.mockResolvedValue(undefined as any);
+			repository.update.mockResolvedValue({ affected: 1, raw: {}, generatedMaps: [] });
 
 			await service.update(1, updateData);
 
@@ -287,7 +287,7 @@ describe('UserService', () => {
 	// 测试删除用户
 	describe('delete', () => {
 		it('应该调用 repository.delete 删除用户', async () => {
-			repository.delete.mockResolvedValue(undefined as any);
+			repository.delete.mockResolvedValue({ affected: 1, raw: {} });
 
 			await service.delete(1);
 
@@ -296,7 +296,7 @@ describe('UserService', () => {
 		});
 
 		it('应该能够删除指定 ID 的用户', async () => {
-			repository.delete.mockResolvedValue(undefined as any);
+			repository.delete.mockResolvedValue({ affected: 1, raw: {} });
 
 			await service.delete(999);
 
@@ -343,7 +343,7 @@ describe('UserService', () => {
 				.mockResolvedValueOnce(null)
 				.mockResolvedValueOnce(null)
 				.mockResolvedValueOnce(updatedUser);
-			repository.update.mockResolvedValue(undefined as any);
+			repository.update.mockResolvedValue({ affected: 1, raw: {}, generatedMaps: [] });
 
 			const result = await service.updateProfile(1, dto);
 
@@ -377,7 +377,7 @@ describe('UserService', () => {
 			const dto: UpdateProfileDto = { username: 'newuser' };
 
 			repository.findOneBy.mockResolvedValueOnce(currentUser).mockResolvedValueOnce(null).mockResolvedValueOnce(updatedUser);
-			repository.update.mockResolvedValue(undefined as any);
+			repository.update.mockResolvedValue({ affected: 1, raw: {}, generatedMaps: [] });
 
 			const result = await service.updateProfile(1, dto);
 
@@ -393,7 +393,7 @@ describe('UserService', () => {
 			const dto: UpdateProfileDto = { username: 'newuser' };
 
 			repository.findOneBy.mockResolvedValueOnce(currentUser).mockResolvedValueOnce(otherUser);
-			repository.update.mockResolvedValue(undefined as any);
+			repository.update.mockResolvedValue({ affected: 1, raw: {}, generatedMaps: [] });
 
 			const err = await service.updateProfile(1, dto).catch(e => e);
 			expect(err).toBeInstanceOf(ConflictException);

@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import type { Request } from 'express';
+import type { JwtPayload, PublicUser } from 'shared';
 
 // 用户控制器单元测试
 describe('UserController', () => {
@@ -39,18 +41,17 @@ describe('UserController', () => {
 	// 测试用户列表
 	describe('GET /user', () => {
 		it('应该返回所有用户列表', async () => {
-			const mockUsers = [
+			const mockUsers: PublicUser[] = [
 				{
 					id: 1,
 					username: 'testuser',
 					email: 'test@example.com',
-					password: 'hashed_password',
 					isAdmin: false,
 					isActive: true,
-					createdAt: new Date(),
+					createdAt: new Date().toISOString(),
 				},
 			];
-			service.findAll.mockResolvedValue(mockUsers as any);
+			service.findAll.mockResolvedValue(mockUsers);
 
 			const result = await controller.findAll();
 
@@ -62,16 +63,15 @@ describe('UserController', () => {
 	// 测试获取单个用户
 	describe('GET /user/:id', () => {
 		it('应该根据 ID 返回对应用户', async () => {
-			const mockUser = {
+			const mockUser: PublicUser = {
 				id: 1,
 				username: 'testuser',
 				email: 'test@example.com',
-				password: 'hashed_password',
 				isAdmin: false,
 				isActive: true,
-				createdAt: new Date(),
+				createdAt: new Date().toISOString(),
 			};
-			service.findOne.mockResolvedValue(mockUser as any);
+			service.findOne.mockResolvedValue(mockUser);
 
 			const result = await controller.findOne(1);
 
@@ -88,12 +88,15 @@ describe('UserController', () => {
 				email: 'new@example.com',
 				password: 'password123',
 			};
-			const mockCreatedUser = {
+			const mockCreatedUser: PublicUser = {
 				id: 1,
-				...createData,
-				createdAt: new Date(),
+				username: createData.username,
+				email: createData.email,
+				isAdmin: false,
+				isActive: true,
+				createdAt: new Date().toISOString(),
 			};
-			service.create.mockResolvedValue(mockCreatedUser as any);
+			service.create.mockResolvedValue(mockCreatedUser);
 
 			const result = await controller.create(createData);
 
@@ -152,20 +155,35 @@ describe('UserController', () => {
 	// 测试自助修改个人设置
 	describe('PATCH /user/profile', () => {
 		const dto = { username: 'newuser' };
+		const request = { user: { sub: 1, username: 'testuser', isAdmin: false } } as Request & { user: JwtPayload };
 
 		it('应使用 JWT 载荷中的 sub 调用 userService.updateProfile', async () => {
-			service.updateProfile.mockResolvedValue({ id: 1, username: 'newuser', email: 'test@example.com' } as any);
+			service.updateProfile.mockResolvedValue({
+				id: 1,
+				username: 'newuser',
+				email: 'test@example.com',
+				isAdmin: false,
+				isActive: true,
+				createdAt: new Date().toISOString(),
+			});
 
-			await controller.updateProfile({ user: { sub: 1, username: 'testuser', isAdmin: false } } as any, dto);
+			await controller.updateProfile(request, dto);
 
 			expect(service.updateProfile).toHaveBeenCalledWith(1, dto);
 		});
 
 		it('应返回更新后的 PublicUser', async () => {
-			const mockUser = { id: 1, username: 'newuser', email: 'test@example.com' };
-			service.updateProfile.mockResolvedValue(mockUser as any);
+			const mockUser: PublicUser = {
+				id: 1,
+				username: 'newuser',
+				email: 'test@example.com',
+				isAdmin: false,
+				isActive: true,
+				createdAt: new Date().toISOString(),
+			};
+			service.updateProfile.mockResolvedValue(mockUser);
 
-			const result = await controller.updateProfile({ user: { sub: 1, username: 'testuser', isAdmin: false } } as any, dto);
+			const result = await controller.updateProfile(request, dto);
 
 			expect(result).toEqual(mockUser);
 		});

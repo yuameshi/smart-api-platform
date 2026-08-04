@@ -3,6 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import type { AuthResponse } from 'shared';
 
 describe('AuthController', () => {
 	let controller: AuthController;
@@ -41,7 +42,7 @@ describe('AuthController', () => {
 				email: 'new@example.com',
 				password: 'password123',
 			};
-			const mockResult = {
+			const mockResult: AuthResponse = {
 				access_token: 'mock_jwt_token',
 				user: {
 					id: 1,
@@ -49,10 +50,10 @@ describe('AuthController', () => {
 					email: 'new@example.com',
 					isAdmin: false,
 					isActive: true,
-					createdAt: new Date(),
+					createdAt: new Date().toISOString(),
 				},
 			};
-			service.register.mockResolvedValue(mockResult as any);
+			service.register.mockResolvedValue(mockResult);
 
 			const result = await controller.register(registerDto);
 
@@ -69,11 +70,18 @@ describe('AuthController', () => {
 				username: 'testuser',
 				password: 'password123',
 			};
-			const mockResult = {
+			const mockResult: AuthResponse = {
 				access_token: 'mock_jwt_token',
-				user: { id: 1, username: 'testuser', email: 'test@example.com' },
+				user: {
+					id: 1,
+					username: 'testuser',
+					email: 'test@example.com',
+					isAdmin: false,
+					isActive: true,
+					createdAt: new Date().toISOString(),
+				},
 			};
-			service.login.mockResolvedValue(mockResult as any);
+			service.login.mockResolvedValue(mockResult);
 
 			const result = await controller.login(loginDto);
 

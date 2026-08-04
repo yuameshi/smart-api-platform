@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
+import { User } from '../user/entities/user.entity';
+import type { PublicUser } from 'shared';
 
 // 认证服务单元测试
 describe('AuthService', () => {
@@ -74,7 +76,7 @@ describe('AuthService', () => {
 				isAdmin: false,
 				isActive: true,
 				createdAt: new Date().toISOString(),
-			} as any);
+			});
 			jwtService.sign.mockReturnValue(mockToken);
 
 			const result = await service.register(registerDto);
@@ -110,14 +112,16 @@ describe('AuthService', () => {
 				email: 'new@example.com',
 				password: 'password123',
 			};
-			const existingUser = {
+			const existingUser: PublicUser = {
 				id: 1,
 				username: 'existinguser',
 				email: 'existing@example.com',
-				password: 'hashed_password',
+				isAdmin: false,
+				isActive: true,
+				createdAt: new Date().toISOString(),
 			};
 
-			userService.findByUsername.mockResolvedValue(existingUser as any);
+			userService.findByUsername.mockResolvedValue(existingUser);
 
 			await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
 			await expect(service.register(registerDto)).rejects.toThrow('用户名已存在');
@@ -130,15 +134,17 @@ describe('AuthService', () => {
 				email: 'existing@example.com',
 				password: 'password123',
 			};
-			const existingUser = {
+			const existingUser: PublicUser = {
 				id: 1,
 				username: 'otheruser',
 				email: 'existing@example.com',
-				password: 'hashed_password',
+				isAdmin: false,
+				isActive: true,
+				createdAt: new Date().toISOString(),
 			};
 
 			userService.findByUsername.mockResolvedValue(null);
-			userService.findByEmail.mockResolvedValue(existingUser as any);
+			userService.findByEmail.mockResolvedValue(existingUser);
 
 			await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
 			await expect(service.register(registerDto)).rejects.toThrow('邮箱已被注册');
@@ -152,7 +158,7 @@ describe('AuthService', () => {
 				username: 'testuser',
 				password: 'password123',
 			};
-			const mockUser = {
+			const mockUser: User = {
 				id: 1,
 				username: 'testuser',
 				email: 'test@example.com',
@@ -163,8 +169,15 @@ describe('AuthService', () => {
 			};
 			const mockToken = 'mock_jwt_token';
 
-			userService.findByUsername.mockResolvedValue(mockUser as any);
-			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser as any);
+			userService.findByUsername.mockResolvedValue({
+				id: mockUser.id,
+				username: mockUser.username,
+				email: mockUser.email,
+				isAdmin: mockUser.isAdmin,
+				isActive: mockUser.isActive,
+				createdAt: mockUser.createdAt.toISOString(),
+			});
+			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser);
 			jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 			jwtService.sign.mockReturnValue(mockToken);
 
@@ -193,7 +206,7 @@ describe('AuthService', () => {
 				username: 'inactiveuser',
 				password: 'password123',
 			};
-			const mockUser = {
+			const mockUser: User = {
 				id: 1,
 				username: 'inactiveuser',
 				email: 'inactive@example.com',
@@ -203,8 +216,15 @@ describe('AuthService', () => {
 				createdAt: new Date(),
 			};
 
-			userService.findByUsername.mockResolvedValue(mockUser as any);
-			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser as any);
+			userService.findByUsername.mockResolvedValue({
+				id: mockUser.id,
+				username: mockUser.username,
+				email: mockUser.email,
+				isAdmin: mockUser.isAdmin,
+				isActive: mockUser.isActive,
+				createdAt: mockUser.createdAt.toISOString(),
+			});
+			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser);
 			jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
 			await expect(service.login(loginDto)).rejects.toThrow(ForbiddenException);
@@ -228,16 +248,25 @@ describe('AuthService', () => {
 				username: 'testuser',
 				password: 'wrongpassword',
 			};
-			const mockUser = {
+			const mockUser: User = {
 				id: 1,
 				username: 'testuser',
 				email: 'test@example.com',
 				password: 'hashed_password',
+				isAdmin: false,
 				isActive: true,
+				createdAt: new Date(),
 			};
 
-			userService.findByUsername.mockResolvedValue(mockUser as any);
-			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser as any);
+			userService.findByUsername.mockResolvedValue({
+				id: mockUser.id,
+				username: mockUser.username,
+				email: mockUser.email,
+				isAdmin: mockUser.isAdmin,
+				isActive: mockUser.isActive,
+				createdAt: mockUser.createdAt.toISOString(),
+			});
+			userService.dangerouslyGetFullUserObjectById.mockResolvedValue(mockUser);
 			jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
 			await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
