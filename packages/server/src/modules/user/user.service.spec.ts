@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Repository } from 'typeorm';
 
 // 用户服务单元测试
@@ -300,6 +301,104 @@ describe('UserService', () => {
 			await service.delete(999);
 
 			expect(repository.delete).toHaveBeenCalledWith(999);
+		});
+	});
+
+	// 测试自助修改个人设置
+	describe('updateProfile', () => {
+		const currentUser: User = {
+			id: 1,
+			username: 'olduser',
+			email: 'old@example.com',
+			password: 'old_hashed_password',
+			isAdmin: false,
+			isActive: true,
+			createdAt: new Date('2026-08-01T00:00:00.000Z'),
+		};
+
+		const updatedUser: User = {
+			id: 1,
+			username: 'newuser',
+			email: 'new@example.com',
+			password: 'new_hashed_password',
+			isAdmin: false,
+			isActive: true,
+			createdAt: new Date('2026-08-01T00:00:00.000Z'),
+		};
+
+		beforeEach(() => {
+			repository.update.mockReset();
+			repository.findOneBy.mockReset();
+		});
+
+		it('应能成功更新所有字段', async () => {
+			const dto: UpdateProfileDto = {
+				username: 'newuser',
+				email: 'new@example.com',
+				password: 'newpassword',
+			};
+
+			repository.findOneBy
+				.mockResolvedValueOnce(currentUser)
+				.mockResolvedValueOnce(null)
+				.mockResolvedValueOnce(null)
+				.mockResolvedValueOnce(updatedUser);
+			repository.update.mockResolvedValue(undefined as any);
+
+			const result = await service.updateProfile(1, dto);
+
+			expect(result).toEqual({
+				id: 1,
+				username: 'newuser',
+				email: 'new@example.com',
+				isAdmin: false,
+				isActive: true,
+				createdAt: expect.any(String),
+			});
+			expect(result).not.toHaveProperty('password');
+
+			expect(repository.update).toHaveBeenCalledTimes(1);
+			const updateArg = repository.update.mock.calls[0][1] as Partial<User>;
+			expect(updateArg.username).toBe('newuser');
+			expect(updateArg.email).toBe('new@example.com');
+			expect(updateArg.password).toBeDefined();
+			expect(updateArg.password).not.toBe('newpassword');
+			expect(updateArg.password).toMatch(/^\$2[ayb]\$/);
+
+			//  调用了 findOneBy({ id })
+			expect(repository.findOneBy).toHaveBeenCalledWith({ id: 1 });
+			expect(repository.findOneBy).toHaveBeenCalledWith({ username: 'newuser' });
+			expect(repository.findOneBy).toHaveBeenCalledWith({ email: 'new@example.com' });
+			// findOne 最后再调一次 findOneBy({ id })
+			expect(repository.findOneBy).toHaveBeenCalledTimes(4);
+		});
+
+		it('应能够更新部分字段', async () => {
+			const dto: UpdateProfileDto = { username: 'newuser' };
+
+			repository.findOneBy.mockResolvedValueOnce(currentUser).mockResolvedValueOnce(null).mockResolvedValueOnce(updatedUser);
+			repository.update.mockResolvedValue(undefined as any);
+
+			const result = await service.updateProfile(1, dto);
+
+			expect(result.username).toBe('newuser');
+			expect(repository.update).toHaveBeenCalledTimes(1);
+			const updateArg = repository.update.mock.calls[0][1] as Partial<User>;
+			expect(updateArg).toEqual({ username: 'newuser' });
+			expect(repository.findOneBy).not.toHaveBeenCalledWith(expect.objectContaining({ email: expect.any(String) }));
+		});
+
+		it('应在用户名被其他用户占用时抛出 ConflictException', async () => {
+			const otherUser: User = { ...currentUser, id: 99, username: 'newuser' };
+			const dto: UpdateProfileDto = { username: 'newuser' };
+
+			repository.findOneBy.mockResolvedValueOnce(currentUser).mockResolvedValueOnce(otherUser);
+			repository.update.mockResolvedValue(undefined as any);
+
+			const err = await service.updateProfile(1, dto).catch(e => e);
+			expect(err).toBeInstanceOf(ConflictException);
+			expect(err.message).toBe('用户名已存在');
+			expect(repository.update).not.toHaveBeenCalled();
 		});
 	});
 });

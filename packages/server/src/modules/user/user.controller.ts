@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Req, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { AdminGuard } from '@/common/guards/admin.guard';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import type { Request } from 'express';
+import type { JwtPayload, PublicUser } from 'shared';
 
 /**
  * /user
@@ -40,6 +43,16 @@ export class UserController {
 	@Post()
 	create(@Body() body: CreateUserDto) {
 		return this.userService.create(body);
+	}
+
+	/**
+	 * 自助修改个人设置
+	 * 仅允许当前登录用户修改自己的资料
+	 * 返回更新后的用户对象
+	 */
+	@Patch('profile')
+	updateProfile(@Req() request: Request & { user: JwtPayload }, @Body() dto: UpdateProfileDto): Promise<PublicUser> {
+		return this.userService.updateProfile(request.user.sub, dto);
 	}
 
 	/**

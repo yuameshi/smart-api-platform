@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import type { PublicUser } from 'shared';
 import { User } from './entities/user.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -101,5 +102,49 @@ export class UserService {
 	 */
 	async delete(id: number): Promise<void> {
 		await this.userRepository.delete(id);
+	}
+
+	/**
+	 * 自助修改个人设置
+	 * 只允许用户修改自己的资料，请求中的 sub 即为目标用户 ID
+	 */
+	async updateProfile(userId: number, dto: UpdateProfileDto): Promise<PublicUser> {
+		const user = await this.findOne(userId);
+		if (!user) {
+			throw new NotFoundException('用户不存在');
+		}
+
+		if (dto.username && dto.username !== user.username) {
+			const existing = await this.findByUsername(dto.username);
+			if (existing && existing.id !== userId) {
+				throw new ConflictException('用户名已存在');
+			}
+		}
+
+		if (dto.email && dto.email !== user.email) {
+			const existing = await this.findByEmail(dto.email);
+			if (existing && existing.id !== userId) {
+				throw new ConflictException('邮箱已被注册');
+			}
+		}
+
+		const updateData: Partial<User> = {};
+		if (dto.username !== undefined) updateData.username = dto.username;
+		if (dto.email !== undefined) updateData.email = dto.email;
+		if (dto.password !== undefined) updateData.password = dto.password;
+
+		if (Object.keys(updateData).length === 0) return user;
+
+		if (updateData.password) {
+			updateData.password = await bcrypt.hash(updateData.password, 10);
+		}
+
+		await this.userRepository.update(userId, updateData);
+
+		const updated = await this.findOne(userId);
+		if (!updated) {
+			throw new NotFoundException('用户不存在');
+		}
+		return updated;
 	}
 }

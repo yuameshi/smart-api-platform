@@ -24,3 +24,10 @@ export type UpdateUserRequest = {
 	isAdmin?: boolean;
 	isActive?: boolean;
 };
+
+/** 用户自助修改个人设置请求体 */
+export type UpdateProfileRequest = {
+	username?: string;
+	email?: string;
+	password?: string;
+};

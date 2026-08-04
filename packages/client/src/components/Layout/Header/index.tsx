@@ -1,24 +1,15 @@
 import { AppBar, IconButton, Toolbar, Typography, Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { tokenAtom } from '@/atoms/token';
-import { userAtom } from '@/atoms/user';
+import { UserDropdown } from './UserDropdown';
 
 export const LayoutHeader = () => {
 	const navigate = useNavigate();
 	const token = useAtomValue(tokenAtom);
-	const user = useAtomValue(userAtom);
-	const setToken = useSetAtom(tokenAtom);
-	const setUser = useSetAtom(userAtom);
 
 	const isLoggedIn = !!token;
-
-	const handleLogout = () => {
-		setToken(undefined);
-		setUser(undefined);
-		navigate('/login');
-	};
 
 	return (
 		<AppBar
@@ -47,21 +38,7 @@ export const LayoutHeader = () => {
 				<Box sx={{ flexGrow: 1 }} />
 				<Box>
 					{isLoggedIn ? (
-						<>
-							<Typography
-								variant='body1'
-								component='span'
-								sx={{ mr: 2, color: 'inherit' }}
-							>
-								{user?.username ?? '用户'}
-							</Typography>
-							<Button
-								color='inherit'
-								onClick={handleLogout}
-							>
-								退出登录
-							</Button>
-						</>
+						<UserDropdown />
 					) : (
 						<>
 							<Button

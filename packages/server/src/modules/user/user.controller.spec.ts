@@ -14,6 +14,7 @@ describe('UserController', () => {
 			create: jest.fn(),
 			update: jest.fn(),
 			delete: jest.fn(),
+			updateProfile: jest.fn(),
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -145,6 +146,28 @@ describe('UserController', () => {
 			await controller.remove(999);
 
 			expect(service.delete).toHaveBeenCalledWith(999);
+		});
+	});
+
+	// 测试自助修改个人设置
+	describe('PATCH /user/profile', () => {
+		const dto = { username: 'newuser' };
+
+		it('应使用 JWT 载荷中的 sub 调用 userService.updateProfile', async () => {
+			service.updateProfile.mockResolvedValue({ id: 1, username: 'newuser', email: 'test@example.com' } as any);
+
+			await controller.updateProfile({ user: { sub: 1, username: 'testuser', isAdmin: false } } as any, dto);
+
+			expect(service.updateProfile).toHaveBeenCalledWith(1, dto);
+		});
+
+		it('应返回更新后的 PublicUser', async () => {
+			const mockUser = { id: 1, username: 'newuser', email: 'test@example.com' };
+			service.updateProfile.mockResolvedValue(mockUser as any);
+
+			const result = await controller.updateProfile({ user: { sub: 1, username: 'testuser', isAdmin: false } } as any, dto);
+
+			expect(result).toEqual(mockUser);
 		});
 	});
 });
