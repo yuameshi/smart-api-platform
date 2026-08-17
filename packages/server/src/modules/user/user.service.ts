@@ -5,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import type { PublicUser } from 'shared';
 import { User } from './entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -93,7 +94,10 @@ export class UserService {
 	/**
 	 * 根据 ID 更新用户信息
 	 */
-	async update(id: number, data: Partial<User>): Promise<void> {
+	async update(id: number, data: UpdateUserDto): Promise<void> {
+		if (data.password) {
+			data.password = await bcrypt.hash(data.password, 10);
+		}
 		await this.userRepository.update(id, data);
 	}
 
