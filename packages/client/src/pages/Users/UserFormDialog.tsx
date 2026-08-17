@@ -8,6 +8,7 @@ interface UserFormData {
 	username: string;
 	email: string;
 	password: string;
+	confirmPassword: string;
 	isAdmin: boolean;
 	isActive: boolean;
 }
@@ -31,12 +32,14 @@ export const UserFormDialog: FC<Props> = ({ open, user, onClose, onSaved, setSna
 		handleSubmit,
 		control,
 		reset,
+		getValues,
 		formState: { errors },
 	} = useForm<UserFormData>({
 		defaultValues: {
 			username: user?.username ?? '',
 			email: user?.email ?? '',
 			password: '',
+			confirmPassword: '',
 			isAdmin: user?.isAdmin ?? false,
 			isActive: user?.isActive ?? true,
 		},
@@ -48,6 +51,7 @@ export const UserFormDialog: FC<Props> = ({ open, user, onClose, onSaved, setSna
 				username: user?.username ?? '',
 				email: user?.email ?? '',
 				password: '',
+				confirmPassword: '',
 				isAdmin: user?.isAdmin ?? false,
 				isActive: user?.isActive ?? true,
 			});
@@ -161,6 +165,26 @@ export const UserFormDialog: FC<Props> = ({ open, user, onClose, onSaved, setSna
 						placeholder={isEdit ? '留空则不修改' : undefined}
 						error={!!errors.password}
 						helperText={errors.password?.message}
+						autoComplete='new-password'
+						disabled={loading}
+					/>
+					<TextField
+						{...register(
+							'confirmPassword',
+							isEdit
+								? { validate: value => value === getValues('password') || '两次输入的密码不一致' }
+								: {
+										required: '请再次输入密码',
+										validate: value => value === getValues('password') || '两次输入的密码不一致',
+									},
+						)}
+						label='确认密码'
+						type='password'
+						fullWidth
+						margin='normal'
+						placeholder={isEdit ? '留空则不修改' : undefined}
+						error={!!errors.confirmPassword}
+						helperText={errors.confirmPassword?.message}
 						autoComplete='new-password'
 						disabled={loading}
 					/>

@@ -10,6 +10,7 @@ interface ProfileFormData {
 	username: string;
 	email: string;
 	password: string;
+	confirmPassword: string;
 }
 
 interface Props {
@@ -28,12 +29,14 @@ export const ProfileSettingsDialog = ({ open, onClose }: Props) => {
 		register,
 		handleSubmit,
 		reset,
+		getValues,
 		formState: { errors },
 	} = useForm<ProfileFormData>({
 		defaultValues: {
 			username: user?.username ?? '',
 			email: user?.email ?? '',
 			password: '',
+			confirmPassword: '',
 		},
 	});
 
@@ -43,6 +46,7 @@ export const ProfileSettingsDialog = ({ open, onClose }: Props) => {
 			username: user?.username ?? '',
 			email: user?.email ?? '',
 			password: '',
+			confirmPassword: '',
 		});
 	};
 
@@ -68,6 +72,7 @@ export const ProfileSettingsDialog = ({ open, onClose }: Props) => {
 				username: res.username,
 				email: res.email,
 				password: '',
+				confirmPassword: '',
 			});
 			setToastMsg('修改成功');
 			onClose();
@@ -145,6 +150,21 @@ export const ProfileSettingsDialog = ({ open, onClose }: Props) => {
 							placeholder='留空则不修改'
 							error={!!errors.password}
 							helperText={errors.password?.message}
+							autoComplete='new-password'
+							disabled={loading}
+						/>
+
+						<TextField
+							{...register('confirmPassword', {
+								validate: value => value === getValues('password') || '两次输入的密码不一致',
+							})}
+							label='确认密码'
+							type='password'
+							fullWidth
+							margin='normal'
+							placeholder='留空则不修改'
+							error={!!errors.confirmPassword}
+							helperText={errors.confirmPassword?.message}
 							autoComplete='new-password'
 							disabled={loading}
 						/>
