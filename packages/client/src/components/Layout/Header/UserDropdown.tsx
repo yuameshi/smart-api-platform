@@ -61,6 +61,16 @@ export const UserDropdown = () => {
 					</Typography>
 				</Box>
 				<Divider />
+				{user?.isAdmin === true && (
+					<MenuItem
+						onClick={() => {
+							setAnchorEl(null);
+							navigate('/users');
+						}}
+					>
+						用户管理
+					</MenuItem>
+				)}
 				<MenuItem onClick={handleOpenSettings}>修改个人设置</MenuItem>
 				<MenuItem onClick={handleLogout}>退出登录</MenuItem>
 			</Menu>
