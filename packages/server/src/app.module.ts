@@ -8,6 +8,7 @@ import { CoreModule } from './common/core/core.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ProjectModule } from './modules/project/project.module';
 
 /**
  * 应用根模块
@@ -31,6 +32,7 @@ import { AuthModule } from './modules/auth/auth.module';
 		// 业务模块
 		UserModule,
 		AuthModule,
+		ProjectModule,
 	],
 })
 export class AppModule implements NestModule {
