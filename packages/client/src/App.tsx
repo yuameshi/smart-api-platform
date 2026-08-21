@@ -9,6 +9,7 @@ const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Users = lazy(() => import('./pages/Users'));
+const Projects = lazy(() => import('./pages/Projects'));
 
 function App() {
 	return (
@@ -18,6 +19,10 @@ function App() {
 					<Route
 						path='/'
 						element={<Home />}
+					/>
+					<Route
+						path='/projects'
+						element={<Projects />}
 					/>
 					<Route element={<AdminGuard />}>
 						<Route
