@@ -1,5 +1,6 @@
-import { useContext, type FC } from 'react';
+import { useContext, useState, type FC } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { deleteFolder } from '@/services/folders';
 import type { TreeNode } from '../..';
 import { PageUtilContext } from '.';
 
@@ -17,16 +18,41 @@ export const DeleteDialog: FC<Props> = ({ open, node, onClose, onComplete }) => 
 		endpointControls: { setEndpoints },
 		selectedControls: { selectedEndpointId, setSelectedEndpointId },
 	} = useContext(PageUtilContext);
+	const [deleting, setDeleting] = useState(false);
 
-	const handleDelete = () => {
+	const handleDelete = async () => {
 		if (!node?.id) return;
-		if (node.kind === 'folder') {
-			// 递归删除文件夹和子项
-			setSnackbar('已删除文件夹');
-		} else if (node.kind === 'endpoint') {
-			setSnackbar('已删除端点');
+		setDeleting(true);
+		try {
+			if (node.kind === 'folder') {
+				// 调用API批量递归删除文件夹
+				await deleteFolder(node.rawId!);
+				// 本地递归删除文件夹
+				const idsToRemove = new Set<number>([node.rawId!]);
+				let changed = true;
+				while (changed) {
+					changed = false;
+					for (const f of folders) {
+						if (f.parentId !== null && idsToRemove.has(f.parentId) && !idsToRemove.has(f.id)) {
+							idsToRemove.add(f.id);
+							changed = true;
+						}
+					}
+				}
+				setFolders(prev => prev.filter(f => !idsToRemove.has(f.id)));
+				setEndpoints(prev => prev.filter(e => !(e.folderId !== null && idsToRemove.has(e.folderId))));
+				setSnackbar('已删除文件夹');
+			} else if (node.kind === 'endpoint') {
+				setEndpoints(prev => prev.filter(e => e.id !== node.rawId));
+				if (selectedEndpointId === node.rawId) setSelectedEndpointId(null);
+				setSnackbar('已删除端点');
+			}
+			onComplete?.();
+		} catch (error) {
+			setSnackbar(error instanceof Error ? error.message : '删除失败');
+		} finally {
+			setDeleting(false);
 		}
-		onComplete?.();
 	};
 
 	return (
@@ -41,11 +67,17 @@ export const DeleteDialog: FC<Props> = ({ open, node, onClose, onComplete }) => 
 				</DialogContentText>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={onClose}>取消</Button>
+				<Button
+					onClick={onClose}
+					disabled={deleting}
+				>
+					取消
+				</Button>
 				<Button
 					color='error'
 					variant='contained'
 					onClick={handleDelete}
+					disabled={deleting}
 				>
 					删除
 				</Button>

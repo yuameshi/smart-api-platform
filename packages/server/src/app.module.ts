@@ -9,6 +9,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProjectModule } from './modules/project/project.module';
+import { FolderModule } from './modules/folder/folder.module';
 
 /**
  * 应用根模块
@@ -33,6 +34,7 @@ import { ProjectModule } from './modules/project/project.module';
 		UserModule,
 		AuthModule,
 		ProjectModule,
+		FolderModule,
 	],
 })
 export class AppModule implements NestModule {

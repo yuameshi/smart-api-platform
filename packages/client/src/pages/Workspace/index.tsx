@@ -1,19 +1,14 @@
-import { useMemo, useState } from 'react';
-import { Box } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { useParams } from 'react-router';
 import type { ApiEndpoint, Folder, HttpMethod } from 'shared';
 import { Layout } from '@/components/Layout';
+import { listFolders } from '@/services/folders';
+import { getProject } from '@/services/projects';
 import Title from '@/utils/Title';
 import { FolderTree } from './components/FolderTree';
 import { MainContent } from './components/MainContent';
 import { PageUtilProvider } from './components/PageUtil';
-
-const MOCK_PROJECT_NAME = '123132';
-
-const MOCK_FOLDERS: Folder[] = [
-	{ id: 1, projectId: 1, parentId: null, name: '111', createdAt: '', updatedAt: '' },
-	{ id: 2, projectId: 1, parentId: 1, name: '222base111', createdAt: '', updatedAt: '' },
-];
 
 const MOCK_ENDPOINTS: ApiEndpoint[] = [
 	{
@@ -126,17 +121,51 @@ function buildTree(folders: Folder[], endpoints: ApiEndpoint[]): TreeNode[] {
 
 export default function Workspace() {
 	const { projectId } = useParams<{ projectId: string }>();
+	const projectIdNumber = Number(projectId ?? 1);
 
-	const [folders, setFolders] = useState<Folder[]>(MOCK_FOLDERS);
+	const [folders, setFolders] = useState<Folder[]>([]);
 	const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(MOCK_ENDPOINTS);
+	const [projectName, setProjectName] = useState<string>('');
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const [selectedEndpointId, setSelectedEndpointId] = useState<number | null>(null);
 
 	const items = useMemo(() => buildTree(folders, endpoints), [folders, endpoints]);
 	const selectedEndpoint = useMemo(() => endpoints.find(e => e.id === selectedEndpointId) ?? null, [endpoints, selectedEndpointId]);
 
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			setError(null);
+			try {
+				const [project, folderList] = await Promise.all([getProject(projectIdNumber), listFolders(projectIdNumber)]);
+				setProjectName(project.name);
+				setFolders(folderList);
+			} catch (err) {
+				setError(err instanceof Error ? err.message : '加载数据失败');
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchData();
+	}, [projectIdNumber]);
+
+	if (loading || error) {
+		return (
+			<Layout>
+				<Title>工作台</Title>
+				<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+					{loading && <CircularProgress />}
+					{error && <Typography color='error'>{error}</Typography>}
+				</Box>
+			</Layout>
+		);
+	}
+
 	return (
 		<Layout>
 			<PageUtilProvider
+				projectId={projectIdNumber}
 				folderControls={{ folders, setFolders }}
 				endpointControls={{ endpoints, setEndpoints }}
 				selectedControls={{ selectedEndpointId, setSelectedEndpointId }}
@@ -170,8 +199,8 @@ export default function Workspace() {
 						}}
 					>
 						<FolderTree
-							projectId={Number(projectId ?? 1)}
-							projectName={MOCK_PROJECT_NAME}
+							projectId={projectIdNumber}
+							projectName={projectName}
 							items={items}
 						/>
 					</Box>

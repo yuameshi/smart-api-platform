@@ -2,7 +2,8 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import type { FC } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField } from '@mui/material';
-import type { ApiEndpoint, Folder } from 'shared';
+import type { ApiEndpoint } from 'shared';
+import { createFolder, updateFolder } from '@/services/folders';
 import type { TreeNode } from '../..';
 import { PageUtilContext } from '.';
 
@@ -65,9 +66,24 @@ export const CreateEditFormDialog: FC<Props> = ({ open, mode, type, activeNode, 
 			if (type === 'folder') {
 				if (mode === 'create') {
 					// 创建文件夹
+					const newFolder = await createFolder({
+						projectId,
+						parentId: parentId ?? undefined,
+						name: data.name,
+					});
+					setFolders(prev => [...prev, newFolder]);
 					setSnackbar('文件夹创建成功');
 				} else if (mode === 'edit' && activeNode?.rawId) {
 					// 编辑文件夹
+					await updateFolder(activeNode.rawId, {
+						name: data.name,
+						parentId,
+					});
+					setFolders(prev =>
+						prev.map(f =>
+							f.id === activeNode.rawId ? { ...f, name: data.name, parentId, updatedAt: new Date().toISOString() } : f,
+						),
+					);
 					setSnackbar('文件夹更新成功');
 				}
 			} else if (type === 'endpoint') {

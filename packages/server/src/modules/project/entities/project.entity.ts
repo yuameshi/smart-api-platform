@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '@/modules/user/entities/user.entity';
 
 @Entity('project')
 export class Project {
@@ -14,6 +15,9 @@ export class Project {
 	// 所属用户ID（外键user.id）
 	@Column({ name: 'owner_id' })
 	ownerId: number;
+	@ManyToOne(() => User, { onDelete: 'CASCADE' })
+	@JoinColumn({ name: 'owner_id' })
+	owner: User;
 
 	@CreateDateColumn({ name: 'created_at' })
 	createdAt: Date;

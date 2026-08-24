@@ -1,11 +1,13 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { FC, MouseEvent } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import { RichTreeView, TreeItem, useRichTreeViewApiRef, useTreeItemModel } from '@mui/x-tree-view';
 import type { TreeItemProps } from '@mui/x-tree-view';
 import { NodeIcon } from './Icons';
 import type { TreeNode } from '../..';
 import { PageUtilContext } from '../PageUtil';
+import AddIcon from '@mui/icons-material/Add';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { ContextMenu, ContextMenuData } from './ContextMenu';
 
 type ContextMenuHandler = (event: MouseEvent<HTMLElement>, node: TreeNode) => void;
@@ -68,6 +70,7 @@ type FolderTreeProps = {
 
 export const FolderTree: FC<FolderTreeProps> = ({ projectId, projectName, items }) => {
 	const {
+		requestCreateOrEdit,
 		selectedControls: { setSelectedEndpointId },
 	} = useContext(PageUtilContext);
 	const apiRef = useRichTreeViewApiRef();
@@ -118,19 +121,50 @@ export const FolderTree: FC<FolderTreeProps> = ({ projectId, projectName, items 
 	return (
 		<TreeContextMenuContext.Provider value={handleOpenContextMenu}>
 			<Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-				<Typography
-					variant='subtitle2'
-					sx={{ px: 2, py: 1, color: 'text.secondary', borderBottom: 1, borderColor: 'divider' }}
+				<Box
+					sx={{
+						display: 'inline-flex',
+						alignItems: 'center',
+						justifyContent: 'space-between',
+						width: '100%',
+						borderBottom: 1,
+						borderColor: 'divider',
+					}}
 				>
 					<Typography
-						component='span'
 						variant='subtitle2'
-						sx={{ mr: 0.5 }}
+						sx={{ px: 2, py: 1, color: 'text.secondary' }}
 					>
-						#{projectId}
+						<Typography
+							component='span'
+							variant='subtitle2'
+							sx={{ mr: 0.5 }}
+						>
+							#{projectId}
+						</Typography>
+						{projectName}
 					</Typography>
-					{projectName}
-				</Typography>
+					<Box sx={{ display: 'flex', gap: 0.5, pr: 1 }}>
+						<IconButton
+							size='small'
+							onClick={() => {
+								requestCreateOrEdit('create', 'endpoint', null);
+							}}
+							aria-label='添加API端点'
+						>
+							<AddIcon fontSize='small' />
+						</IconButton>
+						<IconButton
+							size='small'
+							onClick={() => {
+								requestCreateOrEdit('create', 'folder', null);
+							}}
+							aria-label='创建文件夹'
+						>
+							<CreateNewFolderIcon fontSize='small' />
+						</IconButton>
+					</Box>
+				</Box>
 				<Box sx={{ flex: '1 1 auto', overflow: 'auto', py: 0.5 }}>
 					<RichTreeView
 						items={items}

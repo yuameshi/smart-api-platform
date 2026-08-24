@@ -8,6 +8,7 @@ import type { TreeNode } from '../..';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const PageUtilContext = createContext<{
+	projectId: number;
 	folderControls: {
 		folders: Folder[];
 		setFolders: Dispatch<SetStateAction<Folder[]>>;
@@ -24,6 +25,7 @@ export const PageUtilContext = createContext<{
 	requestDelete: (node: TreeNode) => void;
 	setSnackbar: (message: string) => void;
 }>({
+	projectId: -1,
 	folderControls: { folders: [], setFolders: () => {} },
 	endpointControls: { endpoints: [], setEndpoints: () => {} },
 	selectedControls: { selectedEndpointId: null, setSelectedEndpointId: () => {} },
@@ -33,6 +35,7 @@ export const PageUtilContext = createContext<{
 });
 
 type Props = {
+	projectId: number;
 	folderControls: {
 		folders: Folder[];
 		setFolders: Dispatch<SetStateAction<Folder[]>>;
@@ -48,6 +51,7 @@ type Props = {
 };
 
 export const PageUtilProvider: FC<PropsWithChildren<Props>> = ({
+	projectId,
 	folderControls: { folders, setFolders },
 	endpointControls: { endpoints, setEndpoints },
 	selectedControls: { selectedEndpointId, setSelectedEndpointId },
@@ -72,6 +76,7 @@ export const PageUtilProvider: FC<PropsWithChildren<Props>> = ({
 	return (
 		<PageUtilContext.Provider
 			value={{
+				projectId,
 				folderControls: { folders, setFolders },
 				endpointControls: { endpoints, setEndpoints },
 				selectedControls: { selectedEndpointId, setSelectedEndpointId },
