@@ -3,6 +3,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { FC } from 'react';
 import type { Project } from 'shared';
+import { useNavigate } from 'react-router';
 
 type Props = {
 	project: Project;
@@ -11,9 +12,11 @@ type Props = {
 };
 
 export const ProjectCard: FC<Props> = ({ project, onEdit, onDelete }) => {
+	const navigate = useNavigate();
+
 	return (
 		<Card>
-			<CardActionArea onClick={() => project}>
+			<CardActionArea onClick={() => navigate(`/projects/${project.id}`)}>
 				<CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1, flex: '1 1 auto' }}>
 					<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 						<Typography

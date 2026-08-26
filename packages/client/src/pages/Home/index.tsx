@@ -34,7 +34,7 @@ export default function Home() {
 								variant='contained'
 								size='large'
 								sx={{ mt: 2 }}
-								onClick={() => navigate('/dashboard')}
+								onClick={() => navigate('/projects')}
 							>
 								前往管理面板
 							</Button>

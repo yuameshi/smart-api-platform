@@ -128,7 +128,7 @@ export default function Workspace() {
 				endpointControls={{ endpoints, setEndpoints }}
 				selectedControls={{ selectedEndpointId, setSelectedEndpointId }}
 			>
-				<Title>工作台</Title>
+				<Title>{projectName ? `项目${projectName}的工作台` : '工作台'}</Title>
 				<Box
 					sx={{
 						display: 'flex',
