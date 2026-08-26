@@ -10,7 +10,7 @@ export type {
 	ResponseExample,
 	ApiEndpoint,
 	CreateApiEndpointRequest,
-	UpdateApiEndpointRequest,
+	EditApiEndpointMetaRequest,
 } from './api-endpoint';
 export type { Project, CreateProjectRequest, UpdateProjectRequest } from './project';
 export type { Folder, CreateFolderRequest, UpdateFolderRequest } from './folder';

@@ -1,5 +1,6 @@
 import { useContext, useState, type FC } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { deleteEndpoint } from '@/services/endpoints';
 import { deleteFolder } from '@/services/folders';
 import type { TreeNode } from '../..';
 import { PageUtilContext } from '.';
@@ -43,6 +44,7 @@ export const DeleteDialog: FC<Props> = ({ open, node, onClose, onComplete }) => 
 				setEndpoints(prev => prev.filter(e => !(e.folderId !== null && idsToRemove.has(e.folderId))));
 				setSnackbar('已删除文件夹');
 			} else if (node.kind === 'endpoint') {
+				await deleteEndpoint(node.rawId!);
 				setEndpoints(prev => prev.filter(e => e.id !== node.rawId));
 				if (selectedEndpointId === node.rawId) setSelectedEndpointId(null);
 				setSnackbar('已删除端点');

@@ -3,60 +3,13 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import { useParams } from 'react-router';
 import type { ApiEndpoint, Folder, HttpMethod } from 'shared';
 import { Layout } from '@/components/Layout';
+import { listEndpoints } from '@/services/endpoints';
 import { listFolders } from '@/services/folders';
 import { getProject } from '@/services/projects';
 import Title from '@/utils/Title';
 import { FolderTree } from './components/FolderTree';
 import { MainContent } from './components/MainContent';
 import { PageUtilProvider } from './components/PageUtil';
-
-const MOCK_ENDPOINTS: ApiEndpoint[] = [
-	{
-		id: 1,
-		projectId: 1,
-		folderId: null,
-		method: 'GET',
-		path: '/health',
-		summary: 'health',
-	},
-	{
-		id: 2,
-		projectId: 1,
-		folderId: 2,
-		method: 'POST',
-		path: '/api/user/login',
-		summary: 'login',
-	},
-	{
-		id: 3,
-		projectId: 1,
-		folderId: 2,
-		method: 'GET',
-		path: '/api/user/{id}',
-		summary: ' user detail',
-	},
-	{
-		id: 4,
-		projectId: 1,
-		folderId: 1,
-		method: 'GET',
-		path: '/api/goods',
-		summary: 'list goods',
-	},
-].map(endpoint => ({
-	...endpoint,
-	method: endpoint.method.toUpperCase() as ApiEndpoint['method'],
-	description: null,
-	tags: null,
-	pathParams: null,
-	queryParams: null,
-	headers: null,
-	requestBody: null,
-	responses: null,
-	version: null,
-	createdAt: '',
-	updatedAt: '',
-}));
 
 export type TreeNode = {
 	id: string;
@@ -124,7 +77,7 @@ export default function Workspace() {
 	const projectIdNumber = Number(projectId ?? 1);
 
 	const [folders, setFolders] = useState<Folder[]>([]);
-	const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(MOCK_ENDPOINTS);
+	const [endpoints, setEndpoints] = useState<ApiEndpoint[]>([]);
 	const [projectName, setProjectName] = useState<string>('');
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -138,9 +91,14 @@ export default function Workspace() {
 			setLoading(true);
 			setError(null);
 			try {
-				const [project, folderList] = await Promise.all([getProject(projectIdNumber), listFolders(projectIdNumber)]);
+				const [project, folderList, endpointList] = await Promise.all([
+					getProject(projectIdNumber),
+					listFolders(projectIdNumber),
+					listEndpoints(projectIdNumber),
+				]);
 				setProjectName(project.name);
 				setFolders(folderList);
+				setEndpoints(endpointList);
 			} catch (err) {
 				setError(err instanceof Error ? err.message : '加载数据失败');
 			} finally {

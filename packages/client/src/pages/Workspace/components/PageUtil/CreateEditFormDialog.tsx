@@ -2,13 +2,14 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import type { FC } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField } from '@mui/material';
-import type { ApiEndpoint } from 'shared';
 import { createFolder, updateFolder } from '@/services/folders';
+import { createEndpoint, editEndpointMeta } from '@/services/endpoints';
 import type { TreeNode } from '../..';
 import { PageUtilContext } from '.';
 
-interface FolderFormData {
+interface CreateEditFormData {
 	name: string;
+	path: string;
 	parentId: number | 'null';
 }
 
@@ -24,6 +25,7 @@ type Props = {
 // 包含创建/修改 + 端点/文件夹功能
 export const CreateEditFormDialog: FC<Props> = ({ open, mode, type, activeNode, onClose, onComplete }) => {
 	const {
+		projectId,
 		folderControls: { folders, setFolders },
 		endpointControls: { endpoints, setEndpoints },
 		setSnackbar,
@@ -38,28 +40,41 @@ export const CreateEditFormDialog: FC<Props> = ({ open, mode, type, activeNode, 
 		return activeNode?.kind === 'folder' ? (activeNode.parentId ?? 'null') : (activeNode?.folderId ?? 'null');
 	}, [mode, activeNode]);
 
+	// 如果是编辑端点就获取端点当前路径
+	const defaultPath = useMemo(() => {
+		if (type !== 'endpoint' || mode !== 'edit' || !activeNode?.rawId) return '';
+		return endpoints.find(e => e.id === activeNode.rawId)?.path ?? '';
+	}, [type, mode, activeNode, endpoints]);
+
+	const defaultValues = useMemo(
+		() => ({
+			name: mode === 'create' ? '' : (activeNode?.label ?? ''),
+			path: defaultPath,
+			parentId: defaultParentId,
+		}),
+		[activeNode, defaultPath, defaultParentId, mode],
+	);
+
 	const {
 		control,
 		register,
 		handleSubmit,
 		reset,
 		formState: { errors },
-	} = useForm<FolderFormData>({
-		defaultValues: { name: activeNode?.label, parentId: defaultParentId },
-	});
+	} = useForm<CreateEditFormData>({ defaultValues });
 
 	useEffect(() => {
 		if (open) {
-			reset({ name: activeNode?.label, parentId: defaultParentId });
+			reset(defaultValues);
 		}
-	}, [open, defaultParentId, reset, activeNode?.label]);
+	}, [open, defaultValues, reset]);
 
 	const handleClose = () => {
 		setErrorMsg(null);
 		onClose();
 	};
 
-	const handleSubmitForm = async (data: FolderFormData) => {
+	const handleSubmitForm = async (data: CreateEditFormData) => {
 		try {
 			const parentId = data.parentId === 'null' ? null : Number(data.parentId);
 
@@ -89,11 +104,28 @@ export const CreateEditFormDialog: FC<Props> = ({ open, mode, type, activeNode, 
 			} else if (type === 'endpoint') {
 				if (mode === 'create') {
 					// 创建端点
-
+					const newEndpoint = await createEndpoint({
+						projectId,
+						folderId: parentId,
+						path: data.path,
+						summary: data.name,
+					});
+					setEndpoints(prev => [...prev, newEndpoint]);
 					setSnackbar('API端点创建成功');
 				} else if (mode === 'edit' && activeNode?.rawId) {
-					// 编辑端点
-
+					// 编辑端点元信息
+					await editEndpointMeta(activeNode.rawId, {
+						path: data.path,
+						summary: data.name,
+						folderId: parentId,
+					});
+					setEndpoints(prev =>
+						prev.map(e =>
+							e.id === activeNode.rawId
+								? { ...e, path: data.path, summary: data.name, folderId: parentId, updatedAt: new Date().toISOString() }
+								: e,
+						),
+					);
 					setSnackbar('API端点更新成功');
 				}
 			}
@@ -133,7 +165,7 @@ export const CreateEditFormDialog: FC<Props> = ({ open, mode, type, activeNode, 
 					<TextField
 						{...register('name', {
 							required: '请输入名称',
-							maxLength: { value: 100, message: '名称超长' },
+							maxLength: { value: type === 'endpoint' ? 200 : 100, message: '名称超长' },
 						})}
 						label='名称'
 						fullWidth
@@ -142,6 +174,20 @@ export const CreateEditFormDialog: FC<Props> = ({ open, mode, type, activeNode, 
 						error={!!errors.name}
 						helperText={errors.name?.message}
 					/>
+					{type === 'endpoint' && (
+						<TextField
+							{...register('path', {
+								required: '请输入API路径',
+								maxLength: { value: 255, message: '路径超长' },
+							})}
+							label='API路径'
+							placeholder='/api/v1/goods'
+							fullWidth
+							margin='normal'
+							error={!!errors.path}
+							helperText={errors.path?.message}
+						/>
+					)}
 					<Controller
 						name='parentId'
 						control={control}

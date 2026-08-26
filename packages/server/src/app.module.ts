@@ -10,6 +10,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProjectModule } from './modules/project/project.module';
 import { FolderModule } from './modules/folder/folder.module';
+import { EndpointModule } from './modules/endpoint/endpoint.module';
 
 /**
  * 应用根模块
@@ -35,6 +36,7 @@ import { FolderModule } from './modules/folder/folder.module';
 		AuthModule,
 		ProjectModule,
 		FolderModule,
+		EndpointModule,
 	],
 })
 export class AppModule implements NestModule {

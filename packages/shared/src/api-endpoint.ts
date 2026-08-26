@@ -67,31 +67,13 @@ export type ApiEndpoint = {
 export type CreateApiEndpointRequest = {
 	projectId: number;
 	folderId?: number | null;
-	method: HttpMethod;
 	path: string;
 	summary: string;
-	description?: string;
-	tags?: string[];
-	pathParams?: PathParam[];
-	queryParams?: QueryParam[];
-	headers?: HeaderParam[];
-	requestBody?: RequestBody;
-	responses?: ResponseExample[];
-	version?: string;
 };
 
-/** 更新API端点请求体 */
-export type UpdateApiEndpointRequest = {
-	folderId?: number | null;
-	method?: HttpMethod;
+/** 修改API端点信息请求体 */
+export type EditApiEndpointMetaRequest = {
 	path?: string;
 	summary?: string;
-	description?: string;
-	tags?: string[];
-	pathParams?: PathParam[];
-	queryParams?: QueryParam[];
-	headers?: HeaderParam[];
-	requestBody?: RequestBody;
-	responses?: ResponseExample[];
-	version?: string;
+	folderId?: number | null;
 };
