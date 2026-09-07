@@ -1,5 +1,5 @@
 import { Snackbar } from '@mui/material';
-import { createContext, useState } from 'react';
+import { createContext, useCallback, useMemo, useState } from 'react';
 import type { Dispatch, FC, PropsWithChildren, SetStateAction } from 'react';
 import { DeleteDialog } from './DeleteDialog';
 import { CreateEditFormDialog } from './CreateEditFormDialog';
@@ -65,26 +65,39 @@ export const PageUtilProvider: FC<PropsWithChildren<Props>> = ({
 		node: TreeNode | null;
 	} | null>(null);
 
-	const requestDelete = async (node: TreeNode) => {
+	const requestDelete = useCallback(async (node: TreeNode) => {
 		setDeleteTarget(node);
-	};
+	}, []);
 
-	const requestCreateOrEdit = async (mode: 'create' | 'edit', type: 'endpoint' | 'folder', node: TreeNode | null) => {
+	const requestCreateOrEdit = useCallback(async (mode: 'create' | 'edit', type: 'endpoint' | 'folder', node: TreeNode | null) => {
 		setCreateEditForm({ mode, type, node });
-	};
+	}, []);
+
+	const contextValue = useMemo(
+		() => ({
+			projectId,
+			folderControls: { folders, setFolders },
+			endpointControls: { endpoints, setEndpoints },
+			selectedControls: { selectedEndpointId, setSelectedEndpointId },
+			requestCreateOrEdit,
+			requestDelete,
+			setSnackbar,
+		}),
+		[
+			projectId,
+			endpoints,
+			setEndpoints,
+			folders,
+			setFolders,
+			selectedEndpointId,
+			setSelectedEndpointId,
+			requestCreateOrEdit,
+			requestDelete,
+		],
+	);
 
 	return (
-		<PageUtilContext.Provider
-			value={{
-				projectId,
-				folderControls: { folders, setFolders },
-				endpointControls: { endpoints, setEndpoints },
-				selectedControls: { selectedEndpointId, setSelectedEndpointId },
-				requestCreateOrEdit,
-				requestDelete,
-				setSnackbar,
-			}}
-		>
+		<PageUtilContext.Provider value={contextValue}>
 			{children}
 			<CreateEditFormDialog
 				open={createEditForm !== null}

@@ -7,7 +7,7 @@ export default defineConfig({
 	plugins: [react()],
 	resolve: {
 		alias: {
-			'@': path.resolve(__dirname, './src'),
+			'@': path.resolve(import.meta.dirname, './src'),
 		},
 	},
 	server: {
@@ -17,6 +17,21 @@ export default defineConfig({
 			'/api': {
 				target: 'http://localhost:3000',
 				changeOrigin: true,
+			},
+		},
+	},
+	build: {
+		// Monaco Editor按需加载
+		rolldownOptions: {
+			output: {
+				codeSplitting: {
+					groups: [
+						{
+							name: 'monaco-editor',
+							test: /monaco-editor/,
+						},
+					],
+				},
 			},
 		},
 	},
