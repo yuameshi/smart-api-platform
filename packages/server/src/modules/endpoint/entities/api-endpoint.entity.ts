@@ -52,10 +52,6 @@ export class ApiEndpoint {
 	@Column({ type: 'json', nullable: true })
 	responses: ResponseExample[] | null;
 
-	// 版本号（预留）
-	@Column({ length: 20, nullable: true })
-	version: string;
-
 	@CreateDateColumn({ name: 'created_at' })
 	createdAt: Date;
 

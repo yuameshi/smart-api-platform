@@ -58,7 +58,6 @@ export type ApiEndpoint = {
 	headers: HeaderParam[] | null;
 	requestBody: RequestBody | null;
 	responses: ResponseExample[] | null;
-	version: string | null;
 	createdAt: string;
 	updatedAt: string;
 };

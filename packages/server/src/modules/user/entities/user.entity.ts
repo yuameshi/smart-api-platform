@@ -49,13 +49,13 @@ export class User {
 	 * 是否激活
 	 * 默认为 true，用户创建后自动激活
 	 */
-	@Column({ default: true })
+	@Column({ default: true, name: 'is_active' })
 	isActive: boolean;
 
 	/**
 	 * 创建时间
 	 * 记录用户注册的时间，由 TypeORM 自动设置
 	 */
-	@CreateDateColumn()
+	@CreateDateColumn({ name: 'created_at' })
 	createdAt: Date;
 }
