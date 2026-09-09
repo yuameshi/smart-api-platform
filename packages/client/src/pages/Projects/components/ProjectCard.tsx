@@ -59,6 +59,14 @@ export const ProjectCard: FC<Props> = ({ project, onEdit, onDelete }) => {
 						</Box>
 					</Box>
 					<Box sx={{ color: 'text.secondary' }}>
+						{project.baseUrl && (
+							<Typography
+								variant='body2'
+								sx={{ mb: 1 }}
+							>
+								{project.baseUrl}
+							</Typography>
+						)}
 						<Typography
 							variant='body2'
 							component='pre'

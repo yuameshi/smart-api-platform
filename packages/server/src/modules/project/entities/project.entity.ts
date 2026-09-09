@@ -12,6 +12,9 @@ export class Project {
 	@Column({ type: 'text', nullable: true })
 	description: string | null;
 
+	@Column({ type: 'varchar', length: 500, nullable: true, name: 'base_url' })
+	baseUrl: string | null;
+
 	// 所属用户ID（外键user.id）
 	@Column({ name: 'owner_id' })
 	ownerId: number;

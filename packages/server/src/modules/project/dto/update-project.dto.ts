@@ -10,4 +10,9 @@ export class UpdateProjectDto implements UpdateProjectRequest {
 	@IsOptional()
 	@IsString()
 	description?: string;
+
+	@IsOptional()
+	@IsString()
+	@MaxLength(500)
+	baseUrl?: string | null;
 }

@@ -7,6 +7,7 @@ import { createProject, updateProject } from '@/services/projects';
 interface ProjectFormData {
 	name: string;
 	description: string;
+	baseUrl: string;
 }
 
 interface Props {
@@ -31,6 +32,7 @@ export const ProjectFormDialog: FC<Props> = ({ open, project, onClose, onSaved, 
 		defaultValues: {
 			name: project?.name ?? '',
 			description: project?.description ?? '',
+			baseUrl: project?.baseUrl ?? '',
 		},
 	});
 
@@ -39,6 +41,7 @@ export const ProjectFormDialog: FC<Props> = ({ open, project, onClose, onSaved, 
 			reset({
 				name: project?.name ?? '',
 				description: project?.description ?? '',
+				baseUrl: project?.baseUrl ?? '',
 			});
 		}
 	}, [open, project, reset]);
@@ -53,14 +56,15 @@ export const ProjectFormDialog: FC<Props> = ({ open, project, onClose, onSaved, 
 		setErrorMsg(null);
 
 		try {
-			const payload = {
+			const trimmedBaseUrl = data.baseUrl.trim();
+			const basePayload = {
 				name: data.name,
 				description: data.description.trim() ? data.description : undefined,
 			};
 			if (isEdit) {
-				await updateProject(project.id, payload);
+				await updateProject(project.id, { ...basePayload, baseUrl: trimmedBaseUrl ? trimmedBaseUrl : null });
 			} else {
-				await createProject(payload);
+				await createProject({ ...basePayload, baseUrl: trimmedBaseUrl ? trimmedBaseUrl : undefined });
 			}
 			setSnackbar(isEdit ? '修改成功' : '创建成功');
 			onSaved();
@@ -116,6 +120,14 @@ export const ProjectFormDialog: FC<Props> = ({ open, project, onClose, onSaved, 
 						rows={3}
 						error={!!errors.description}
 						helperText={errors.description?.message}
+						disabled={loading}
+					/>
+					<TextField
+						{...register('baseUrl')}
+						label='Base URL'
+						placeholder='http://localhost:3000/'
+						fullWidth
+						margin='normal'
 						disabled={loading}
 					/>
 				</form>

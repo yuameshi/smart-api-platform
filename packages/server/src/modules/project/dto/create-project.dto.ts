@@ -10,4 +10,9 @@ export class CreateProjectDto implements CreateProjectRequest {
 	@IsOptional()
 	@IsString()
 	description?: string;
+
+	@IsOptional()
+	@IsString()
+	@MaxLength(500)
+	baseUrl?: string;
 }
