@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import type { HttpMethod, PathParam, QueryParam, HeaderParam, RequestBody, ResponseExample } from 'shared';
+import type { HttpMethod, KeyValueEntry, RequestBody, ResponseExample } from 'shared';
 import { Project } from '@/modules/project/entities/project.entity';
 import { Folder } from '@/modules/folder/entities/folder.entity';
 
@@ -38,13 +38,13 @@ export class ApiEndpoint {
 	tags: string[] | null;
 
 	@Column({ type: 'json', nullable: true, name: 'path_params' })
-	pathParams: PathParam[] | null;
+	pathParams: KeyValueEntry[] | null;
 
 	@Column({ type: 'json', nullable: true, name: 'query_params' })
-	queryParams: QueryParam[] | null;
+	queryParams: KeyValueEntry[] | null;
 
 	@Column({ type: 'json', nullable: true })
-	headers: HeaderParam[] | null;
+	headers: KeyValueEntry[] | null;
 
 	@Column({ type: 'json', nullable: true, name: 'request_body' })
 	requestBody: RequestBody | null;

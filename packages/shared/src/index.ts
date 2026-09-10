@@ -3,14 +3,12 @@ export type { PublicUser, CreateUserRequest, UpdateUserRequest, UpdateProfileReq
 export type { AuthResponse, JwtPayload, LoginRequest, RegisterRequest } from './auth';
 export type {
 	HttpMethod,
-	PathParam,
-	QueryParam,
-	HeaderParam,
-	RequestBody,
 	ResponseExample,
 	ApiEndpoint,
 	CreateApiEndpointRequest,
 	EditApiEndpointMetaRequest,
+	UpdateApiEndpointContentRequest,
 } from './api-endpoint';
+export type { KeyValueEntry, RequestBody, AuthConfig, SendHttpRequestRequest, SentHttpError, SentHttpResponse } from './http-request';
 export type { Project, CreateProjectRequest, UpdateProjectRequest } from './project';
 export type { Folder, CreateFolderRequest, UpdateFolderRequest } from './folder';

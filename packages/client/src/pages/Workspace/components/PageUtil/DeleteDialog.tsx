@@ -4,6 +4,7 @@ import { deleteEndpoint } from '@/services/endpoints';
 import { deleteFolder } from '@/services/folders';
 import type { TreeNode } from '../..';
 import { PageUtilContext } from '.';
+import { freeDirtyEndpoint } from '../MainContent/EndpointEditor/draft';
 
 type Props = {
 	open: boolean;
@@ -45,6 +46,8 @@ export const DeleteDialog: FC<Props> = ({ open, node, onClose, onComplete }) => 
 				setSnackbar('已删除文件夹');
 			} else if (node.kind === 'endpoint') {
 				await deleteEndpoint(node.rawId!);
+				// 释放编辑器的内存
+				freeDirtyEndpoint(node.rawId!);
 				setEndpoints(prev => prev.filter(e => e.id !== node.rawId));
 				if (selectedEndpointId === node.rawId) setSelectedEndpointId(null);
 				setSnackbar('已删除端点');

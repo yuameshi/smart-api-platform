@@ -84,7 +84,6 @@ export default function Workspace() {
 	const [selectedEndpointId, setSelectedEndpointId] = useState<number | null>(null);
 
 	const items = useMemo(() => buildTree(folders, endpoints), [folders, endpoints]);
-	const selectedEndpoint = useMemo(() => endpoints.find(e => e.id === selectedEndpointId) ?? null, [endpoints, selectedEndpointId]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -162,7 +161,7 @@ export default function Workspace() {
 							items={items}
 						/>
 					</Box>
-					<MainContent endpoint={selectedEndpoint} />
+					<MainContent />
 				</Box>
 			</PageUtilProvider>
 		</Layout>

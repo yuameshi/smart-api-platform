@@ -1,4 +1,4 @@
-import type { ApiEndpoint, CreateApiEndpointRequest, EditApiEndpointMetaRequest } from 'shared';
+import type { ApiEndpoint, CreateApiEndpointRequest, EditApiEndpointMetaRequest, UpdateApiEndpointContentRequest } from 'shared';
 import api from '@/services/api';
 
 export async function listEndpoints(projectId: number, folderId?: number): Promise<ApiEndpoint[]> {
@@ -15,6 +15,11 @@ export async function createEndpoint(data: CreateApiEndpointRequest): Promise<Ap
 
 export async function editEndpointMeta(id: number, data: EditApiEndpointMetaRequest): Promise<void> {
 	await api.patch(`/endpoint/${id}/meta`, data);
+}
+
+// todo
+export async function updateEndpointContent(id: number, data: UpdateApiEndpointContentRequest): Promise<void> {
+	console.log(`[updateEndpointContent] id=${id}`, JSON.stringify(data, null, 2));
 }
 
 export async function deleteEndpoint(id: number): Promise<void> {

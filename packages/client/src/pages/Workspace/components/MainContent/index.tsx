@@ -1,30 +1,20 @@
 import type { FC } from 'react';
-import { Box, Typography } from '@mui/material';
-import type { ApiEndpoint } from 'shared';
+import { Box } from '@mui/material';
+import { useContext, useMemo } from 'react';
+import { PageUtilContext } from '../PageUtil';
 import { Placeholder } from './Placeholder';
+import { EndpointEditor } from './EndpointEditor';
 
-type Props = {
-	endpoint: ApiEndpoint | null;
-};
+export const MainContent: FC = () => {
+	const { endpointControls, selectedControls } = useContext(PageUtilContext);
+	const selectedEndpoint = useMemo(
+		() => endpointControls.endpoints.find(e => e.id === selectedControls.selectedEndpointId) ?? null,
+		[endpointControls.endpoints, selectedControls.selectedEndpointId],
+	);
 
-export const MainContent: FC<Props> = ({ endpoint }) => {
 	return (
-		<Box sx={{ flex: '1 1 auto', overflow: 'auto', p: 2 }}>
-			{endpoint ? (
-				<Box sx={{ mt: 2 }}>
-					<Typography variant='h6'>
-						{endpoint.method} {endpoint.path}
-					</Typography>
-					<Typography
-						variant='body2'
-						sx={{ color: 'text.secondary', mt: 1 }}
-					>
-						{endpoint.summary}
-					</Typography>
-				</Box>
-			) : (
-				<Placeholder />
-			)}
+		<Box sx={{ flex: '1 1 auto', overflow: 'hidden', minWidth: 0 }}>
+			{selectedEndpoint ? <EndpointEditor endpoint={selectedEndpoint} /> : <Placeholder />}
 		</Box>
 	);
 };
