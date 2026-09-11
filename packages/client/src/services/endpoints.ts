@@ -17,9 +17,8 @@ export async function editEndpointMeta(id: number, data: EditApiEndpointMetaRequ
 	await api.patch(`/endpoint/${id}/meta`, data);
 }
 
-// todo
 export async function updateEndpointContent(id: number, data: UpdateApiEndpointContentRequest): Promise<void> {
-	console.log(`[updateEndpointContent] id=${id}`, JSON.stringify(data, null, 2));
+	await api.patch(`/endpoint/${id}`, data);
 }
 
 export async function deleteEndpoint(id: number): Promise<void> {

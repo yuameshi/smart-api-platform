@@ -6,6 +6,8 @@ import { Folder } from '@/modules/folder/entities/folder.entity';
 import { ProjectService } from '@/modules/project/project.service';
 import { CreateEndpointDto } from './dto/create-endpoint.dto';
 import { EditEndpointMetaDto } from './dto/edit-endpoint-meta.dto';
+import { UpdateEndpointContentDto } from './dto/update-endpoint-content.dto';
+import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class EndpointService {
@@ -70,6 +72,11 @@ export class EndpointService {
 		}
 
 		await this.endpointRepository.update(id, dto);
+	}
+
+	async updateContent(id: number, dto: UpdateEndpointContentDto, userId: number, isAdmin: boolean): Promise<void> {
+		await this.findOneOwned(id, userId, isAdmin);
+		await this.endpointRepository.update(id, dto as QueryDeepPartialEntity<ApiEndpoint>);
 	}
 
 	async remove(id: number, userId: number, isAdmin: boolean): Promise<void> {

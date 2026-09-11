@@ -4,6 +4,7 @@ import type { JwtPayload } from 'shared';
 import { EndpointService } from './endpoint.service';
 import { CreateEndpointDto } from './dto/create-endpoint.dto';
 import { EditEndpointMetaDto } from './dto/edit-endpoint-meta.dto';
+import { UpdateEndpointContentDto } from './dto/update-endpoint-content.dto';
 
 @Controller('endpoint')
 export class EndpointController {
@@ -32,6 +33,16 @@ export class EndpointController {
 	@Patch(':id/meta')
 	editMeta(@Param('id', ParseIntPipe) id: number, @Body() dto: EditEndpointMetaDto, @Req() request: Request & { user: JwtPayload }) {
 		return this.endpointService.editMeta(id, dto, request.user.sub, request.user.isAdmin);
+	}
+
+	// 更新整个端点数据
+	@Patch(':id')
+	updateContent(
+		@Param('id', ParseIntPipe) id: number,
+		@Body() dto: UpdateEndpointContentDto,
+		@Req() request: Request & { user: JwtPayload },
+	) {
+		return this.endpointService.updateContent(id, dto, request.user.sub, request.user.isAdmin);
 	}
 
 	@Delete(':id')

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import type { HttpMethod, KeyValueEntry, RequestBody, ResponseExample } from 'shared';
+import type { AuthConfig, HttpMethod, KeyValueEntry, RequestBody, ResponseExample } from 'shared';
 import { Project } from '@/modules/project/entities/project.entity';
 import { Folder } from '@/modules/folder/entities/folder.entity';
 
@@ -48,6 +48,9 @@ export class ApiEndpoint {
 
 	@Column({ type: 'json', nullable: true, name: 'request_body' })
 	requestBody: RequestBody | null;
+
+	@Column({ type: 'json', nullable: true })
+	auth: AuthConfig | null;
 
 	@Column({ type: 'json', nullable: true })
 	responses: ResponseExample[] | null;
