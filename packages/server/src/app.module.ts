@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ProjectModule } from './modules/project/project.module';
 import { FolderModule } from './modules/folder/folder.module';
 import { EndpointModule } from './modules/endpoint/endpoint.module';
+import { HttpRequestsModule } from './modules/http-request/http-request.module';
 
 /**
  * 应用根模块
@@ -37,6 +38,7 @@ import { EndpointModule } from './modules/endpoint/endpoint.module';
 		ProjectModule,
 		FolderModule,
 		EndpointModule,
+		HttpRequestsModule,
 	],
 })
 export class AppModule implements NestModule {

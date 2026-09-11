@@ -1,31 +1,6 @@
 import type { SendHttpRequestRequest, SentHttpResponse } from 'shared';
+import api from '@/services/api';
 
-// todo
 export async function sendHttpRequest(data: SendHttpRequestRequest): Promise<SentHttpResponse> {
-	console.log('[sendHttpRequest]', data);
-	return {
-		ok: true,
-		status: 200,
-		statusText: 'OK',
-		headers: [
-			{
-				key: 'header',
-				value: 'value',
-			},
-			{
-				key: 'header',
-				value: 'value',
-			},
-			{
-				key: 'header',
-				value: 'value',
-			},
-		],
-		body: '{}',
-		encoding: 'utf8',
-		contentType: 'application/json',
-		durationMs: 325,
-		sizeBytes: 325325,
-	};
-	return { ok: false, error: { kind: 'unknown', message: '' } };
+	return (await api.post('/http-request/send', data)) as SentHttpResponse;
 }
