@@ -8,6 +8,7 @@ export type EndpointDraft = {
 	// 端点数据
 	method: HttpMethod;
 	path: string; // URL，不含search params
+	description: string;
 	params: KeyValueEntry[];
 	headers: KeyValueEntry[];
 	// 转格式，避免频繁对数组进行find
@@ -25,6 +26,7 @@ export const draftFamily = atomFamily((endpointId: number) =>
 		initialized: false,
 		method: 'GET',
 		path: '',
+		description: '',
 		params: [],
 		headers: [],
 		pathParamEntries: {},
@@ -44,6 +46,7 @@ export function draftFromEndpoint(e: ApiEndpoint): EndpointDraft {
 		initialized: true,
 		method: e.method,
 		path: e.path,
+		description: e.description ?? '',
 		params: (e.queryParams ?? []) as KeyValueEntry[],
 		headers: (e.headers ?? []) as KeyValueEntry[],
 		pathParamEntries: Object.fromEntries(
@@ -70,6 +73,7 @@ export const stringifyDraft = (draft: EndpointDraft) =>
 				// 只导出会保存的key
 				'method',
 				'path',
+				'description',
 				'params',
 				'headers',
 				'pathParamEntries',

@@ -41,15 +41,15 @@ export const ResponseBar = ({ response, view, onViewChange }: Props) => {
 			</Typography>
 			<Typography variant='caption'>
 				<b>用时:</b>
-				{response.durationMs}ms
+				{response.durationMs}MS
 			</Typography>
 			<Typography variant='caption'>
 				<b>体积:</b>
-				{(response.sizeBytes / 1024).toFixed(2)}kb
+				{(response.sizeBytes / 1024).toFixed(2)}KB
 			</Typography>
 			{response.contentType && (
 				<Typography variant='caption'>
-					<b>类型:</b>
+					<b>MIME类型:</b>
 					{response.contentType}
 				</Typography>
 			)}

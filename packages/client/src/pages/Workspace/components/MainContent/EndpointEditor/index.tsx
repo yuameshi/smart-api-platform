@@ -80,6 +80,7 @@ export const EndpointEditor: FC<Props> = ({ endpoint }) => {
 		await updateEndpointContent(endpoint.id, {
 			method: draft.method,
 			path: draft.path,
+			description: draft.description,
 			pathParams,
 			queryParams: draft.params,
 			headers: draft.headers,
@@ -94,6 +95,7 @@ export const EndpointEditor: FC<Props> = ({ endpoint }) => {
 							...e,
 							method: draft.method,
 							path: draft.path,
+							description: draft.description,
 							queryParams: draft.params,
 							headers: draft.headers,
 							pathParams,

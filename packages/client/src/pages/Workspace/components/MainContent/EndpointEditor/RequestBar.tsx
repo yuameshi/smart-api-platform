@@ -28,49 +28,61 @@ export const RequestBar = ({ draft, setDraft, dirty, onSend, onSave }: Props) =>
 	};
 
 	return (
-		<Box sx={{ display: 'flex', gap: 1, p: 1, alignItems: 'center' }}>
-			<Select
-				value={draft.method}
-				onChange={e => setDraft(prev => ({ ...prev, method: e.target.value as HttpMethod }))}
-				renderValue={method => <span style={{ color: METHOD_INFO[method].color, fontWeight: 'bold' }}>{method}</span>}
-				size='small'
-				sx={{ minWidth: 120 }}
-			>
-				{METHODS.map(m => (
-					<MenuItem
-						key={m}
-						value={m}
-						sx={{ color: METHOD_INFO[m].color, fontWeight: 'bold' }}
-					>
-						{m}
-					</MenuItem>
-				))}
-			</Select>
-			<TextField
-				size='small'
-				fullWidth
-				value={draft.path}
-				onChange={e => handleUrlChange(e.target.value)}
-				onKeyDown={e => {
-					if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-				}}
-				placeholder='/path'
-			/>
-			<Button
-				variant='contained'
-				onClick={onSend}
-				disabled={draft.sending}
-				loading={draft.sending}
-			>
-				发送
-			</Button>
-			<Button
-				variant='contained'
-				disabled={!dirty}
-				onClick={onSave}
-			>
-				保存
-			</Button>
+		<Box sx={{ pb: 1 }}>
+			<Box sx={{ display: 'flex', gap: 1, p: 1, alignItems: 'center' }}>
+				<Select
+					value={draft.method}
+					onChange={e => setDraft(prev => ({ ...prev, method: e.target.value as HttpMethod }))}
+					renderValue={method => <span style={{ color: METHOD_INFO[method].color, fontWeight: 'bold' }}>{method}</span>}
+					size='small'
+					sx={{ minWidth: 120 }}
+				>
+					{METHODS.map(m => (
+						<MenuItem
+							key={m}
+							value={m}
+							sx={{ color: METHOD_INFO[m].color, fontWeight: 'bold' }}
+						>
+							{m}
+						</MenuItem>
+					))}
+				</Select>
+				<TextField
+					size='small'
+					fullWidth
+					value={draft.path}
+					onChange={e => handleUrlChange(e.target.value)}
+					onKeyDown={e => {
+						if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+					}}
+					placeholder='/path'
+				/>
+				<Button
+					variant='contained'
+					onClick={onSend}
+					disabled={draft.sending}
+					loading={draft.sending}
+				>
+					发送
+				</Button>
+				<Button
+					variant='contained'
+					disabled={!dirty}
+					onClick={onSave}
+				>
+					保存
+				</Button>
+			</Box>
+			<Box sx={{ px: 1 }}>
+				<TextField
+					size='small'
+					fullWidth
+					multiline
+					value={draft.description}
+					onChange={e => setDraft(prev => ({ ...prev, description: e.target.value }))}
+					placeholder='端点描述'
+				/>
+			</Box>
 		</Box>
 	);
 };

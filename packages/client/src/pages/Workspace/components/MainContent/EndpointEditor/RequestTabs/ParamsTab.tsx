@@ -75,7 +75,6 @@ export const ParamsTab = ({ draft, setDraft }: Props) => {
 						params: rows,
 					}))
 				}
-				showDescription
 				keyPlaceholder='参数名'
 			/>
 		</Box>

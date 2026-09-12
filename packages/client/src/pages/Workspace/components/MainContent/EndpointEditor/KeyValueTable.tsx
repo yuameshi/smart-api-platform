@@ -11,13 +11,12 @@ type Row = {
 type Props<T extends Row> = {
 	rows: T[];
 	onChange: (rows: T[]) => void;
-	showDescription?: boolean;
 	keyPlaceholder?: string;
 };
 
 const isEmptyRow = (r: Row) => r.key === '' && r.value === '' && (r.description ?? '') === '';
 
-export const KeyValueTable = <T extends Row>({ rows, onChange, showDescription = false, keyPlaceholder = '键' }: Props<T>) => {
+export const KeyValueTable = <T extends Row>({ rows, onChange, keyPlaceholder = '键' }: Props<T>) => {
 	// 在末尾追加一个空行，用于新增行
 	const rowsWithEmptyRow =
 		rows.length > 0 && isEmptyRow(rows[rows.length - 1]) ? rows : ([...rows, { key: '', value: '', active: true }] as T[]);
@@ -43,7 +42,7 @@ export const KeyValueTable = <T extends Row>({ rows, onChange, showDescription =
 					<TableCell padding='checkbox' />
 					<TableCell>{keyPlaceholder}</TableCell>
 					<TableCell>值</TableCell>
-					{showDescription && <TableCell>描述</TableCell>}
+					<TableCell>描述</TableCell>
 					<TableCell padding='checkbox' />
 				</TableRow>
 			</TableHead>
@@ -78,16 +77,14 @@ export const KeyValueTable = <T extends Row>({ rows, onChange, showDescription =
 								onChange={e => update(i, { value: e.target.value } as Partial<T>)}
 							/>
 						</TableCell>
-						{showDescription && (
-							<TableCell>
-								<TextField
-									size='small'
-									fullWidth
-									value={row.description ?? ''}
-									onChange={e => update(i, { description: e.target.value } as Partial<T>)}
-								/>
-							</TableCell>
-						)}
+						<TableCell>
+							<TextField
+								size='small'
+								fullWidth
+								value={row.description ?? ''}
+								onChange={e => update(i, { description: e.target.value } as Partial<T>)}
+							/>
+						</TableCell>
 						<TableCell padding='checkbox'>
 							<IconButton
 								size='small'

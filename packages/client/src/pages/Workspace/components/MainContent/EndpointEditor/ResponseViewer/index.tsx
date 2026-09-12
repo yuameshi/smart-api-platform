@@ -79,8 +79,15 @@ export const ResponseViewer = ({ draft }: Props) => {
 
 function SuccessView({ response }: { response: Extract<SentHttpResponse, { ok: true }> }) {
 	const contentType = response.contentType ?? '';
-	const isJson = contentType.includes('json') && response.encoding === 'utf8';
 	const [view, setView] = useState<ResponseViewType>('body');
+	let isJson = contentType.includes('json') && response.encoding === 'utf8';
+	let body = response.body;
+	try {
+		body = JSON.stringify(JSON.parse(body), null, 2);
+	} catch (error) {
+		console.warn('解析JSON返回值失败', error);
+		isJson = false;
+	}
 
 	return (
 		<Box
@@ -117,7 +124,7 @@ function SuccessView({ response }: { response: Extract<SentHttpResponse, { ok: t
 						>
 							<MonacoEditor
 								lang={isJson ? 'json' : 'text'}
-								value={JSON.stringify(JSON.parse(response.body), null, 2)}
+								value={body}
 								height='100%'
 							/>
 						</Suspense>
