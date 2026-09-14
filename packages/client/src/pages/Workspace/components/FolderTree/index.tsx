@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { FC, MouseEvent } from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { useNavigate } from 'react-router';
 import { RichTreeView, TreeItem, useRichTreeViewApiRef, useTreeItemModel } from '@mui/x-tree-view';
 import type { TreeItemProps } from '@mui/x-tree-view';
 import { NodeIcon } from './Icons';
@@ -8,6 +9,7 @@ import type { TreeNode } from '../..';
 import { PageUtilContext } from '../PageUtil';
 import AddIcon from '@mui/icons-material/Add';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { ContextMenu, ContextMenuData } from './ContextMenu';
 
 type ContextMenuHandler = (event: MouseEvent<HTMLElement>, node: TreeNode) => void;
@@ -74,6 +76,7 @@ export const FolderTree: FC<FolderTreeProps> = ({ projectId, projectName, items 
 		selectedControls: { setSelectedEndpointId },
 	} = useContext(PageUtilContext);
 	const apiRef = useRichTreeViewApiRef();
+	const navigate = useNavigate();
 	const [contextMenu, setContextMenu] = useState<ContextMenuData | null>(null);
 
 	// 递归遍历TreeNode，生成id和TreeNode对应表
@@ -145,24 +148,37 @@ export const FolderTree: FC<FolderTreeProps> = ({ projectId, projectName, items 
 						{projectName}
 					</Typography>
 					<Box sx={{ display: 'flex', gap: 0.5, pr: 1 }}>
-						<IconButton
-							size='small'
-							onClick={() => {
-								requestCreateOrEdit('create', 'endpoint', null);
-							}}
-							aria-label='添加API端点'
-						>
-							<AddIcon fontSize='small' />
-						</IconButton>
-						<IconButton
-							size='small'
-							onClick={() => {
-								requestCreateOrEdit('create', 'folder', null);
-							}}
-							aria-label='创建文件夹'
-						>
-							<CreateNewFolderIcon fontSize='small' />
-						</IconButton>
+						<Tooltip title='添加API端点'>
+							<IconButton
+								size='small'
+								onClick={() => {
+									requestCreateOrEdit('create', 'endpoint', null);
+								}}
+								aria-label='添加API端点'
+							>
+								<AddIcon fontSize='small' />
+							</IconButton>
+						</Tooltip>
+						<Tooltip title='创建文件夹'>
+							<IconButton
+								size='small'
+								onClick={() => {
+									requestCreateOrEdit('create', 'folder', null);
+								}}
+								aria-label='创建文件夹'
+							>
+								<CreateNewFolderIcon fontSize='small' />
+							</IconButton>
+						</Tooltip>
+						<Tooltip title='测试流程'>
+							<IconButton
+								size='small'
+								onClick={() => navigate(`/projects/${projectId}/test-flows`)}
+								aria-label='测试流程'
+							>
+								<AccountTreeIcon fontSize='small' />
+							</IconButton>
+						</Tooltip>
 					</Box>
 				</Box>
 				<Box sx={{ flex: '1 1 auto', overflow: 'auto', py: 0.5 }}>

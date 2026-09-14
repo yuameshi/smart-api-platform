@@ -11,6 +11,7 @@ const Register = lazy(() => import('./pages/Register'));
 const Users = lazy(() => import('./pages/Users'));
 const Projects = lazy(() => import('./pages/Projects'));
 const Workspace = lazy(() => import('./pages/Workspace'));
+const TestFlow = lazy(() => import('./pages/TestFlow'));
 
 function App() {
 	return (
@@ -28,6 +29,10 @@ function App() {
 					<Route
 						path='/projects/:projectId'
 						element={<Workspace />}
+					/>
+					<Route
+						path='/projects/:projectId/test-flows'
+						element={<TestFlow />}
 					/>
 					<Route element={<AdminGuard />}>
 						<Route

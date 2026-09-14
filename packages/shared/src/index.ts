@@ -12,3 +12,4 @@ export type {
 export type { KeyValueEntry, RequestBody, AuthConfig, SendHttpRequestRequest, SentHttpError, SentHttpResponse } from './http-request';
 export type { Project, CreateProjectRequest, UpdateProjectRequest } from './project';
 export type { Folder, CreateFolderRequest, UpdateFolderRequest } from './folder';
+export type { TestFlow, CreateTestFlowRequest, UpdateTestFlowRequest } from './test-flow';
