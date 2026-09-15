@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestFlow } from './entities/test-flow.entity';
+import { TestStep } from './entities/test-step.entity';
 import { TestFlowService } from './test-flow.service';
 import { TestFlowController } from './test-flow.controller';
 import { ProjectModule } from '@/modules/project/project.module';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([TestFlow]), ProjectModule],
+	imports: [TypeOrmModule.forFeature([TestFlow, TestStep]), ProjectModule],
 	controllers: [TestFlowController],
 	providers: [TestFlowService],
 })

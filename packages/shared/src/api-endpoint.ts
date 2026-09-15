@@ -3,7 +3,9 @@
 import type { AuthConfig, KeyValueEntry, RequestBody } from './http-request';
 
 /** HTTP方法列表 */
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
+export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const;
+/** HTTP方法列表 */
+export type HttpMethod = (typeof HTTP_METHODS)[number];
 
 /** 端点响应示例 */
 export type ResponseExample = {
