@@ -6,6 +6,7 @@ import { CreateTestFlowDto } from './dto/create-test-flow.dto';
 import { UpdateTestFlowDto } from './dto/update-test-flow.dto';
 import { CreateTestStepDto } from './dto/create-test-step.dto';
 import { UpdateTestStepDto } from './dto/update-test-step.dto';
+import { ReorderTestStepsDto } from './dto/reorder-test-steps.dto';
 
 @Controller('test-flow')
 export class TestFlowController {
@@ -43,6 +44,16 @@ export class TestFlowController {
 		@Req() request: Request & { user: JwtPayload },
 	) {
 		return this.testFlowService.createStep(flowId, dto, request.user.sub, request.user.isAdmin);
+	}
+
+	// 步骤排序
+	@Patch(':flowId/steps/reorder')
+	reorderSteps(
+		@Param('flowId', ParseIntPipe) flowId: number,
+		@Body() dto: ReorderTestStepsDto,
+		@Req() request: Request & { user: JwtPayload },
+	) {
+		return this.testFlowService.reorderSteps(flowId, dto.orderedIds, request.user.sub, request.user.isAdmin);
 	}
 
 	// 更新步骤

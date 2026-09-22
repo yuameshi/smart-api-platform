@@ -20,3 +20,7 @@ export async function updateTestStep(flowId: number, stepId: number, data: Updat
 export async function deleteTestStep(flowId: number, stepId: number): Promise<void> {
 	await api.delete(`/test-flow/${flowId}/steps/${stepId}`);
 }
+
+export async function reorderTestSteps(flowId: number, orderedIds: number[]): Promise<void> {
+	await api.patch(`/test-flow/${flowId}/steps/reorder`, { orderedIds });
+}

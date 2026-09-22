@@ -78,14 +78,22 @@ export class TestFlowService {
 	// 新增步骤
 	async createStep(flowId: number, dto: CreateTestStepDto, userId: number, isAdmin: boolean): Promise<TestStep> {
 		const flow = await this.findOneOwned(flowId, userId, isAdmin);
-		// 确保添加到末尾
-		const count = await this.testStepRepository.count({ where: { testFlowId: flow.id } });
-		return this.testStepRepository.save({
-			testFlowId: flow.id,
-			order: count,
-			type: dto.type,
-			name: dto.name,
-			config: dto.config,
+		// 在事务内取当前最大order后追加，避免产生重复order
+		return this.testStepRepository.manager.transaction(async manager => {
+			const repository = manager.getRepository(TestStep);
+			const last = await repository.findOne({
+				where: { testFlowId: flow.id },
+				order: { order: 'DESC' },
+				select: { order: true },
+			});
+			const nextOrder = (last?.order ?? -1) + 1;
+			return repository.save({
+				testFlowId: flow.id,
+				order: nextOrder,
+				type: dto.type,
+				name: dto.name,
+				config: dto.config,
+			});
 		});
 	}
 
@@ -116,6 +124,35 @@ export class TestFlowService {
 				.set({ order: () => 'step_order - 1' })
 				.where('test_flow_id = :flowId AND step_order > :order', { flowId: step.testFlowId, order: step.order })
 				.execute();
+		});
+	}
+
+	// 步骤排序
+	async reorderSteps(flowId: number, orderedIds: number[], userId: number, isAdmin: boolean): Promise<void> {
+		const flow = await this.findOneOwned(flowId, userId, isAdmin);
+		// 获取当前这个流程下的所有步骤
+		const existing = await this.testStepRepository.find({
+			where: { testFlowId: flow.id },
+			select: { id: true },
+			order: { order: 'ASC' },
+		});
+		const existingIds = new Set(existing.map(step => step.id));
+		const uniqueIds = new Set(orderedIds);
+		if (
+			// 校验新旧ID列表元素数量不能变
+			orderedIds.length !== existing.length ||
+			uniqueIds.size !== orderedIds.length ||
+			// 确保前端传的id和数据库内的id一致
+			orderedIds.some(id => !existingIds.has(id))
+		) {
+			throw new BadRequestException('步骤列表与流程不一致');
+		}
+		// 通过事务批量更新
+		await this.testStepRepository.manager.transaction(async manager => {
+			for (let index = 0; index < orderedIds.length; index++) {
+				// 更新对应下标id的order为index
+				await manager.update(TestStep, orderedIds[index], { order: index });
+			}
 		});
 	}
 }

@@ -18,10 +18,13 @@ export type {
 	TestStepType,
 	RequestStepConfig,
 	AssertOperator,
+	AssertLeft,
 	AssertStepConfig,
+	ExtractionRule,
 	TestStepConfig,
 	TestStep,
 	CreateTestStepRequest,
 	UpdateTestStepRequest,
+	ReorderTestStepsRequest,
 } from './test-flow';
 export { ASSERT_OPERATORS, TEST_STEP_TYPE } from './test-flow';

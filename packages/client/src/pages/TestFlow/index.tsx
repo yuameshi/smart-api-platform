@@ -12,7 +12,7 @@ import { Placeholder } from './components/Placeholder';
 
 export default function TestFlowPage() {
 	const { projectId } = useParams<{ projectId: string }>();
-	const projectIdNumber = Number(projectId ?? 1);
+	const projectIdNumber = Number(projectId ?? -1);
 
 	const [flows, setFlows] = useState<TestFlow[]>([]);
 	const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -22,6 +22,11 @@ export default function TestFlowPage() {
 	useEffect(() => {
 		let active = true;
 		const fetchData = async () => {
+			if (!Number.isInteger(projectIdNumber) || projectIdNumber <= 0) {
+				setError('项目ID无效');
+				setLoading(false);
+				return;
+			}
 			setLoading(true);
 			setError(null);
 			try {
@@ -61,39 +66,36 @@ export default function TestFlowPage() {
 				flowControls={{ flows, setFlows }}
 				selectedControls={{ selectedId, setSelectedId }}
 			>
-				<Box sx={{ minHeight: '70vh', px: 3, py: 2 }}>
+				<Box
+					sx={{
+						display: 'flex',
+						flexDirection: { xs: 'column', md: 'row' },
+						height: 'calc(100vh - 128px)',
+						border: 1,
+						borderColor: 'divider',
+						borderRadius: 1,
+						overflow: 'hidden',
+						mx: 2,
+					}}
+				>
 					<Box
 						sx={{
-							display: 'flex',
-							flexDirection: { xs: 'column', md: 'row' },
-							minHeight: 'calc(100vh - 200px)',
-							border: 1,
+							width: { xs: '100%', md: 300 },
+							flexShrink: 0,
+							borderRight: theme => ({
+								xs: 0,
+								md: '1px solid ' + theme.palette.divider,
+							}),
+							borderBottom: theme => ({
+								xs: '1px solid ' + theme.palette.divider,
+								md: 0,
+							}),
 							borderColor: 'divider',
-							borderRadius: 1,
-							overflow: 'hidden',
 						}}
 					>
-						<Box
-							sx={{
-								width: { xs: '100%', md: 280 },
-								flexShrink: 0,
-								borderRight: theme => ({
-									xs: 0,
-									md: '1px solid ' + theme.palette.divider,
-								}),
-								borderBottom: theme => ({
-									xs: '1px solid ' + theme.palette.divider,
-									md: 0,
-								}),
-								borderColor: 'divider',
-							}}
-						>
-							<TestFlowList />
-						</Box>
-						<Box sx={{ flex: '1 1 auto', overflow: 'hidden', minWidth: 0 }}>
-							{selectedFlow ? <TestFlowEditor flow={selectedFlow} /> : <Placeholder />}
-						</Box>
+						<TestFlowList />
 					</Box>
+					{selectedFlow ? <TestFlowEditor flow={selectedFlow} /> : <Placeholder />}
 				</Box>
 			</PageContextProvider>
 		</Layout>

@@ -9,7 +9,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
 export const TestFlowList: FC = () => {
-	const {} = useContext(PageContext);
 	const navigate = useNavigate();
 	const {
 		projectId,
@@ -76,6 +75,7 @@ export const TestFlowList: FC = () => {
 				<List disablePadding>
 					{flows.map(flow => (
 						<ListItem
+							key={flow.id}
 							disablePadding
 							secondaryAction={
 								<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
