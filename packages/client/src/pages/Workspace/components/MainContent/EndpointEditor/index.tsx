@@ -6,7 +6,7 @@ import type { ApiEndpoint, SendHttpRequestRequest } from 'shared';
 import { PageUtilContext } from '../../PageUtil';
 import { updateEndpointContent } from '@/services/endpoints';
 import { sendHttpRequest } from '@/services/httpRequests';
-import { draftFamily, draftFromEndpoint, getPathParams, stringifyDraft } from './draft';
+import { cleanDraft, draftFamily, draftFromEndpoint, getPathParams, stringifyDraft } from './draft';
 import { RequestBar } from './RequestBar';
 import { ResponseViewer } from './ResponseViewer';
 import { RequestTabs } from './RequestTabs';
@@ -67,25 +67,31 @@ export const EndpointEditor: FC<Props> = ({ endpoint }) => {
 	};
 
 	const handleSave = async () => {
-		// 通过url动态生成pathParams
+		// 清理空行
+		const cleaned = cleanDraft(draft);
+		// 通过url动态生成pathParams，然后从draft里取值转为储存格式
 		const pathParams = pathParamKeys.map(k => {
-			const entry = draft.pathParamEntries[k];
+			const entry = cleaned.pathParamEntries[k];
 			return {
 				key: k,
 				value: entry?.value ?? '',
 				active: entry?.active ?? true,
-				...(entry?.description !== undefined && entry.description.trim() !== '' ? { description: entry.description } : {}),
+				...(entry?.description !== undefined && entry.description.trim() !== ''
+					? {
+							description: entry.description,
+						}
+					: {}),
 			};
 		});
 		await updateEndpointContent(endpoint.id, {
-			method: draft.method,
-			path: draft.path,
-			description: draft.description,
+			method: cleaned.method,
+			path: cleaned.path,
+			description: cleaned.description,
 			pathParams,
-			queryParams: draft.params,
-			headers: draft.headers,
-			requestBody: draft.body,
-			auth: draft.auth,
+			queryParams: cleaned.params,
+			headers: cleaned.headers,
+			requestBody: cleaned.body,
+			auth: cleaned.auth,
 		});
 		// 实时刷新端点列表
 		endpointControls.setEndpoints(list =>
@@ -93,18 +99,20 @@ export const EndpointEditor: FC<Props> = ({ endpoint }) => {
 				e.id === endpoint.id
 					? {
 							...e,
-							method: draft.method,
-							path: draft.path,
-							description: draft.description,
-							queryParams: draft.params,
-							headers: draft.headers,
+							method: cleaned.method,
+							path: cleaned.path,
+							description: cleaned.description,
+							queryParams: cleaned.params,
+							headers: cleaned.headers,
 							pathParams,
-							requestBody: draft.body,
-							auth: draft.auth,
+							requestBody: cleaned.body,
+							auth: cleaned.auth,
 						}
 					: e,
 			),
 		);
+		// 刷新draft
+		setDraft(prev => ({ ...prev, ...cleaned }));
 		// 移除url中已删除的pathParamEntries
 		setDraft(prev => ({
 			...prev,

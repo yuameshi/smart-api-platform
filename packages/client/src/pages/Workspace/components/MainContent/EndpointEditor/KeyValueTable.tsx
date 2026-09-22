@@ -24,6 +24,7 @@ export const KeyValueTable = <T extends Row>({ rows, onChange, keyPlaceholder = 
 	const update = (index: number, patch: Partial<T>) => {
 		if (index >= rows.length) {
 			// 空行编辑后转为正常行
+			if (patch.key === undefined && patch.value === undefined && patch.description === undefined) return;
 			onChange([...rows, { ...rowsWithEmptyRow[index], ...patch } as T]);
 			return;
 		}
@@ -56,6 +57,7 @@ export const KeyValueTable = <T extends Row>({ rows, onChange, keyPlaceholder = 
 							<Checkbox
 								size='small'
 								checked={row.active}
+								disabled={i >= rows.length}
 								onChange={e => update(i, { active: e.target.checked } as Partial<T>)}
 							/>
 						</TableCell>

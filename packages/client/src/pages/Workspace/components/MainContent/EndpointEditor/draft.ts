@@ -85,3 +85,28 @@ export const stringifyDraft = (draft: EndpointDraft) =>
 
 // 从URL提取路径参数
 export const getPathParams = (url: string) => [...new Set([...url.matchAll(/\{([^{}]+)\}/g)].map(m => m[1]))];
+
+const isEmptyKVEntry = (entry: KeyValueEntry) => entry.key === '' && entry.value === '' && (entry.description ?? '') === '';
+
+export const cleanDraft = (draft: EndpointDraft): EndpointDraft => {
+	return {
+		...draft,
+		params: draft.params.filter(e => !isEmptyKVEntry(e)),
+		headers: draft.headers.filter(e => !isEmptyKVEntry(e)),
+		body:
+			draft.body.kind === 'formUrlEncoded'
+				? { ...draft.body, entries: draft.body.entries.filter(entry => !isEmptyKVEntry(entry)) }
+				: draft.body,
+		pathParamEntries: Object.fromEntries(
+			Object.entries(draft.pathParamEntries).filter(
+				([key, entry]) =>
+					!isEmptyKVEntry({
+						key,
+						value: entry.value,
+						active: entry.active,
+						description: entry.description,
+					}),
+			),
+		),
+	};
+};
