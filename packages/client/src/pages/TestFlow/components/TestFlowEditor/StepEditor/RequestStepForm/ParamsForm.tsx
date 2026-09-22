@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import type { KeyValueEntry } from 'shared';
 import { useEffect, useMemo, useRef } from 'react';
-import { KeyValueTable } from '@/pages/Workspace/components/MainContent/EndpointEditor/KeyValueTable';
+import { KeyValueTable } from '@/components/KeyValueTable';
 import { getPathParams } from '@/pages/Workspace/components/MainContent/EndpointEditor/draft';
 
 type Props = {

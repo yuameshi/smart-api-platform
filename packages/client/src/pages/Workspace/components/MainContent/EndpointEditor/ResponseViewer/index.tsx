@@ -5,7 +5,7 @@ import type { EndpointDraft } from '../draft';
 import { ResponseBar, type ResponseViewType } from './ResponseBar';
 import { HeadersTable } from './HeadersTable';
 
-const MonacoEditor = lazy(() => import('../MonacoEditor'));
+const MonacoEditor = lazy(() => import('@/components/MonacoEditor'));
 
 type Props = {
 	draft: EndpointDraft;

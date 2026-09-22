@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Box, TextField, Typography } from '@mui/material';
-import { KeyValueTable } from '../KeyValueTable';
+import { KeyValueTable } from '@/components/KeyValueTable';
 import { getPathParams, type EndpointDraft } from '../draft';
 import { KeyValueEntry } from 'shared';
 

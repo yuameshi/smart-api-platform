@@ -1,8 +1,8 @@
 import { lazy, Suspense, useState } from 'react';
 import { Box, CircularProgress, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import type { RequestBody } from 'shared';
-import { KeyValueTable } from '@/pages/Workspace/components/MainContent/EndpointEditor/KeyValueTable';
-const MonacoEditor = lazy(() => import('@/pages/Workspace/components/MainContent/EndpointEditor/MonacoEditor'));
+import { KeyValueTable } from '@/components/KeyValueTable';
+const MonacoEditor = lazy(() => import('@/components/MonacoEditor'));
 
 const BODY_KINDS = ['none', 'raw', 'formUrlEncoded'] as const;
 const BODY_KIND_LABELS: Record<RequestBody['kind'], string> = {

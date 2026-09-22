@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { KeyValueTable } from '../KeyValueTable';
+import { KeyValueTable } from '@/components/KeyValueTable';
 import type { EndpointDraft } from '../draft';
 
 type Props = {

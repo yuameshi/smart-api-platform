@@ -1,10 +1,10 @@
 import { lazy, Suspense, useState } from 'react';
 import { Box, CircularProgress, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { KeyValueTable } from '../KeyValueTable';
+import { KeyValueTable } from '@/components/KeyValueTable';
 import type { RequestBody } from 'shared';
 import type { EndpointDraft } from '../draft';
 
-const MonacoEditor = lazy(() => import('../MonacoEditor'));
+const MonacoEditor = lazy(() => import('@/components/MonacoEditor'));
 
 type Props = {
 	draft: EndpointDraft;
