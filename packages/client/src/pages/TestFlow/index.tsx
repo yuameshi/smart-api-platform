@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useParams } from 'react-router';
 import type { TestFlow } from 'shared';
@@ -9,6 +9,7 @@ import { PageContextProvider } from './components/PageContext';
 import { TestFlowList } from './components/TestFlowList';
 import { TestFlowEditor } from './components/TestFlowEditor';
 import { Placeholder } from './components/Placeholder';
+import { StepManagerProvider } from './components/TestFlowEditor/StepManagerContext';
 
 export default function TestFlowPage() {
 	const { projectId } = useParams<{ projectId: string }>();
@@ -43,8 +44,6 @@ export default function TestFlowPage() {
 			active = false;
 		};
 	}, [projectIdNumber]);
-
-	const selectedFlow = useMemo(() => flows.find(f => f.id === selectedId) ?? null, [flows, selectedId]);
 
 	if (loading || error) {
 		return (
@@ -95,7 +94,30 @@ export default function TestFlowPage() {
 					>
 						<TestFlowList />
 					</Box>
-					{selectedFlow ? <TestFlowEditor flow={selectedFlow} /> : <Placeholder />}
+					{selectedId ? (
+						<StepManagerProvider testFlowId={selectedId}>
+							{({ loading, loadError }) =>
+								loading === true ? (
+									<Box sx={{ display: 'flex', flex: '1 1 auto', justifyContent: 'center', alignItems: 'center' }}>
+										<CircularProgress />
+									</Box>
+								) : loadError !== null ? (
+									<Box sx={{ display: 'flex', flex: '1 1 auto', justifyContent: 'center', alignItems: 'center' }}>
+										<Typography
+											variant='h6'
+											color='error'
+										>
+											{loadError}
+										</Typography>
+									</Box>
+								) : (
+									<TestFlowEditor />
+								)
+							}
+						</StepManagerProvider>
+					) : (
+						<Placeholder />
+					)}
 				</Box>
 			</PageContextProvider>
 		</Layout>

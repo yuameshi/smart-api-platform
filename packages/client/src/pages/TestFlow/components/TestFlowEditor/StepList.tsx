@@ -1,5 +1,5 @@
 import { useContext, useState, type FC } from 'react';
-import { Box, Button, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material';
+import { Box, Button, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, Typography } from '@mui/material';
 import type { CreateTestStepRequest, TestStep, TestStepType } from 'shared';
 import { freeDraftStep, type StepRunStatus } from './draft-steps';
 import { StepManagerContext } from './StepManagerContext';
@@ -10,6 +10,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RuleIcon from '@mui/icons-material/Rule';
 import SendIcon from '@mui/icons-material/Send';
+import { PageContext } from '../PageContext';
 
 const getStatusColor = (status: StepRunStatus) => {
 	switch (status) {
@@ -34,6 +35,9 @@ const reindex = (steps: TestStep[]): TestStep[] =>
 
 export const StepList: FC = () => {
 	const { testFlowId, currentStep, setCurrentStep, steps, setSteps } = useContext(StepManagerContext);
+	const {
+		selectedControls: { selectedFlow },
+	} = useContext(PageContext);
 	const [loading, setLoading] = useState(false);
 	// todo, 后续为执行时当前步骤的状态
 	const stepRunStatus: StepRunStatus = 'idle';
@@ -125,6 +129,17 @@ export const StepList: FC = () => {
 
 	return (
 		<Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+			<Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderBottom: 1, borderColor: 'divider' }}>
+				<Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
+					<Typography variant='h6'>{selectedFlow?.name || '未知测试流程'}</Typography>
+					<Typography
+						variant='body2'
+						sx={{ color: 'text.secondary' }}
+					>
+						{selectedFlow?.description || '暂无描述'}
+					</Typography>
+				</Box>
+			</Box>
 			<Box sx={{ flex: '1 1 auto', overflow: 'auto' }}>
 				<List disablePadding>
 					{steps.map((step, index) => {

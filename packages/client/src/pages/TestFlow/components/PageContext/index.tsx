@@ -13,6 +13,7 @@ export const PageContext = createContext<{
 		setFlows: Dispatch<SetStateAction<TestFlow[]>>;
 	};
 	selectedControls: {
+		selectedFlow: TestFlow | null;
 		selectedId: number | null;
 		setSelectedId: Dispatch<SetStateAction<number | null>>;
 	};
@@ -22,7 +23,11 @@ export const PageContext = createContext<{
 }>({
 	projectId: -1,
 	flowControls: { flows: [], setFlows: () => {} },
-	selectedControls: { selectedId: null, setSelectedId: () => {} },
+	selectedControls: {
+		selectedFlow: null,
+		selectedId: null,
+		setSelectedId: () => {},
+	},
 	requestCreateOrEdit: () => {},
 	requestDelete: () => {},
 	setSnackbar: () => {},
@@ -65,7 +70,11 @@ export const PageContextProvider: FC<PropsWithChildren<Props>> = ({
 		() => ({
 			projectId,
 			flowControls: { flows, setFlows },
-			selectedControls: { selectedId, setSelectedId },
+			selectedControls: {
+				selectedFlow: flows.find(f => f.id === selectedId) ?? null,
+				selectedId,
+				setSelectedId,
+			},
 			requestCreateOrEdit,
 			requestDelete,
 			setSnackbar,

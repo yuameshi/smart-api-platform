@@ -9,6 +9,7 @@ import { PageContext } from '../../PageContext';
 import { StepManagerContext } from '../StepManagerContext';
 import { useAtom } from 'jotai';
 import { updateTestStep } from '@/services/testSteps';
+import { VariablesPanel } from './VariablesPanel';
 
 export const StepEditor = () => {
 	// placeholder
@@ -137,6 +138,7 @@ export const StepEditor = () => {
 					/>
 				)}
 			</Box>
+			<VariablesPanel />
 			<ImportApiDialog
 				projectId={projectId}
 				open={openImportDialog}
