@@ -8,7 +8,7 @@ import { buildHeaders, buildBody, buildUrl, processNetworkError, processResponse
 export class HttpRequestsService {
 	constructor(private readonly projectService: ProjectService) {}
 
-	async send(dto: SendHttpRequestDto, userId: number, isAdmin: boolean): Promise<SentHttpResponse> {
+	async send(dto: SendHttpRequestDto, userId: number, isAdmin: boolean, options?: { signal?: AbortSignal }): Promise<SentHttpResponse> {
 		const project = await this.projectService.findOneOwned(dto.projectId, userId, isAdmin);
 
 		// 拼接url
@@ -26,8 +26,8 @@ export class HttpRequestsService {
 				headers: buildHeaders(dto.headers, dto.body, dto.auth),
 				body: buildBody(dto.body),
 				redirect: 'follow',
-				// 30s超时
-				signal: AbortSignal.timeout(30_000),
+				// 30s超时 + signal终止
+				signal: options?.signal ? AbortSignal.any([AbortSignal.timeout(30_000), options.signal]) : AbortSignal.timeout(30_000),
 			});
 			return {
 				ok: true,

@@ -3,5 +3,6 @@ packages:
 allowBuilds:
   '@scarf/scarf': true
   esbuild: true
+  re2: true
   unrs-resolver: true
 onlyBuiltDependencies: esbuild @scarf/scarf unrs-resolver

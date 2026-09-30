@@ -27,4 +27,15 @@ export type {
 	UpdateTestStepRequest,
 	ReorderTestStepsRequest,
 } from './test-flow';
-export { ASSERT_OPERATORS, TEST_STEP_TYPE } from './test-flow';
+export type {
+	PersistedTestRunStatus,
+	TestRunStatus,
+	StepRunStatus,
+	VariableStore,
+	AssertionVerdict,
+	StepRunResult,
+	TestRunContext,
+	TestRunEvent,
+	TestFlowRun,
+} from './test-flow';
+export { ASSERT_OPERATORS, TEST_STEP_TYPE, TEST_RUN_STATUS } from './test-flow';

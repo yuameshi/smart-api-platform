@@ -1,7 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req } from '@nestjs/common';
-import type { Request } from 'express';
-import type { JwtPayload } from 'shared';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res } from '@nestjs/common';
+import type { Request, Response } from 'express';
+import type { JwtPayload, TestRunEvent } from 'shared';
+import { filter } from 'rxjs';
 import { TestFlowService } from './test-flow.service';
+import { TestFlowRunnerService } from './runner/test-flow-runner.service';
+import { TestFlowRunRecordService } from './run/test-flow-run-record.service';
+import { RunEventStream } from './run/run-event-stream';
+
 import { CreateTestFlowDto } from './dto/create-test-flow.dto';
 import { UpdateTestFlowDto } from './dto/update-test-flow.dto';
 import { CreateTestStepDto } from './dto/create-test-step.dto';
@@ -10,7 +15,12 @@ import { ReorderTestStepsDto } from './dto/reorder-test-steps.dto';
 
 @Controller('test-flow')
 export class TestFlowController {
-	constructor(private readonly testFlowService: TestFlowService) {}
+	constructor(
+		private readonly testFlowService: TestFlowService,
+		private readonly runnerService: TestFlowRunnerService,
+		private readonly runRecordService: TestFlowRunRecordService,
+		private readonly runEventStream: RunEventStream,
+	) {}
 
 	// 获取项目下全部测试流程（管理员可以直接看）
 	@Get()
@@ -18,6 +28,108 @@ export class TestFlowController {
 		return this.testFlowService.findAllByProject(projectId, request.user.sub, request.user.isAdmin);
 	}
 
+	// ==============================================
+	// 测试运行部分
+	// 触发运行，返回runId，客户端在后面通过sse订阅
+	@Post(':flowId/runs')
+	startRun(@Param('flowId', ParseIntPipe) flowId: number, @Req() request: Request & { user: JwtPayload }) {
+		return this.runnerService.startRun(flowId, request.user.sub, request.user.isAdmin);
+	}
+
+	// 运行历史
+	@Get(':flowId/runs')
+	async listRuns(@Param('flowId', ParseIntPipe) flowId: number, @Req() request: Request & { user: JwtPayload }) {
+		await this.testFlowService.findOneOwned(flowId, request.user.sub, request.user.isAdmin);
+		return this.runRecordService.listByFlow(flowId);
+	}
+
+	// 运行详情
+	@Get(':flowId/runs/:runId')
+	async findRun(
+		@Param('flowId', ParseIntPipe) flowId: number,
+		@Param('runId', ParseIntPipe) runId: number,
+		@Req() request: Request & { user: JwtPayload },
+	) {
+		await this.testFlowService.findOneOwned(flowId, request.user.sub, request.user.isAdmin);
+		return this.runRecordService.findByFlowAndId(flowId, runId);
+	}
+
+	// 停止运行
+	@Post(':flowId/runs/:runId/stop')
+	async stopRun(
+		@Param('flowId', ParseIntPipe) flowId: number,
+		@Param('runId', ParseIntPipe) runId: number,
+		@Req() request: Request & { user: JwtPayload },
+	) {
+		await this.testFlowService.findOneOwned(flowId, request.user.sub, request.user.isAdmin);
+		await this.runRecordService.findByFlowAndId(flowId, runId);
+		this.runnerService.stopRun(runId);
+		return { stopped: true };
+	}
+
+	// SSE流式推送测试进程
+	@Get(':flowId/runs/:runId/stream')
+	async streamRun(
+		@Param('flowId', ParseIntPipe) flowId: number,
+		@Param('runId', ParseIntPipe) runId: number,
+		@Req() request: Request & { user: JwtPayload },
+		// 使用手写Response绕开TransformInterceptor
+		@Res() response: Response,
+	) {
+		await this.testFlowService.findOneOwned(flowId, request.user.sub, request.user.isAdmin);
+		const run = await this.runRecordService.findByFlowAndId(flowId, runId);
+
+		// 指定SSE响应头
+		response.set({
+			'Content-Type': 'text/event-stream',
+			'Cache-Control': 'no-cache',
+			Connection: 'keep-alive',
+			'X-Accel-Buffering': 'no',
+		});
+		response.flushHeaders();
+
+		const send = (event: TestRunEvent) => {
+			response.write(`data: ${JSON.stringify(event)}\n\n`);
+		};
+
+		// 定时发心跳包
+		const heartbeat = setInterval(() => {
+			response.write(': ping\n\n');
+		}, 20 * 1000);
+
+		// 取消事件订阅，清除循环发心跳包
+		const cleanup = () => {
+			clearInterval(heartbeat);
+			subscription.unsubscribe();
+		};
+
+		// 先订阅运行事件，按runId筛选
+		const subscription = this.runEventStream.events$.pipe(filter(event => event.runId === runId)).subscribe(event => {
+			send(event);
+			// 运行结束时清理
+			if (event.context.status !== 'running') {
+				cleanup();
+				response.end();
+			}
+		});
+
+		// 发送当前状态
+		const liveStatus = this.runnerService.getLatestContext(runId);
+		const snapshot = liveStatus ?? this.runnerService.contextFromRunRecord(run);
+		send({ runId, context: snapshot });
+
+		// 完成运行的直接断开
+		if (snapshot.status !== 'running') {
+			cleanup();
+			response.end();
+			return;
+		}
+
+		// 浏览器主动断开时清理
+		response.on('close', cleanup);
+	}
+
+	// ==============================================
 	// 测试步骤增删改查
 
 	// 获取步骤列表
@@ -77,6 +189,7 @@ export class TestFlowController {
 		return this.testFlowService.removeStep(flowId, stepId, request.user.sub, request.user.isAdmin);
 	}
 
+	// ==============================================
 	// 测试流程增删改查
 
 	// 查

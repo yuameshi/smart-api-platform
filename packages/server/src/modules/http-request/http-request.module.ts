@@ -7,5 +7,6 @@ import { HttpRequestController } from './http-request.controller';
 	imports: [ProjectModule],
 	controllers: [HttpRequestController],
 	providers: [HttpRequestsService],
+	exports: [HttpRequestsService],
 })
 export class HttpRequestsModule {}

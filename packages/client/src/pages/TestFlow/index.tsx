@@ -9,7 +9,9 @@ import { PageContextProvider } from './components/PageContext';
 import { TestFlowList } from './components/TestFlowList';
 import { TestFlowEditor } from './components/TestFlowEditor';
 import { Placeholder } from './components/Placeholder';
-import { StepManagerProvider } from './components/TestFlowEditor/StepManagerContext';
+import { UiProvider } from './components/TestFlowEditor/Contexts/UiContext';
+import { StepProvider } from './components/TestFlowEditor/Contexts/StepContext';
+import { RunProvider } from './components/TestFlowEditor/Contexts/RunContext';
 
 export default function TestFlowPage() {
 	const { projectId } = useParams<{ projectId: string }>();
@@ -95,26 +97,13 @@ export default function TestFlowPage() {
 						<TestFlowList />
 					</Box>
 					{selectedId ? (
-						<StepManagerProvider testFlowId={selectedId}>
-							{({ loading, loadError }) =>
-								loading === true ? (
-									<Box sx={{ display: 'flex', flex: '1 1 auto', justifyContent: 'center', alignItems: 'center' }}>
-										<CircularProgress />
-									</Box>
-								) : loadError !== null ? (
-									<Box sx={{ display: 'flex', flex: '1 1 auto', justifyContent: 'center', alignItems: 'center' }}>
-										<Typography
-											variant='h6'
-											color='error'
-										>
-											{loadError}
-										</Typography>
-									</Box>
-								) : (
+						<UiProvider testFlowId={selectedId}>
+							<StepProvider testFlowId={selectedId}>
+								<RunProvider testFlowId={selectedId}>
 									<TestFlowEditor />
-								)
-							}
-						</StepManagerProvider>
+								</RunProvider>
+							</StepProvider>
+						</UiProvider>
 					) : (
 						<Placeholder />
 					)}

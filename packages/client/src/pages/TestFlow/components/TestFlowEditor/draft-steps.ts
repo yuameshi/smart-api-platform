@@ -1,8 +1,7 @@
 import { atom } from 'jotai';
 import { atomFamily } from 'jotai-family';
-import type { SentHttpResponse, TestStep, AssertStepConfig, RequestStepConfig, KeyValueEntry } from 'shared';
-
-export type StepRunStatus = 'idle' | 'running' | 'success' | 'failed' | 'stopped';
+import type { SentHttpResponse, TestStep, AssertStepConfig, RequestStepConfig, KeyValueEntry, StepRunStatus } from 'shared';
+export type { StepRunStatus };
 
 type DraftStepBase = {
 	initialized: boolean; // 检测是否初始化过
@@ -59,6 +58,16 @@ export const clearDraftStep = () => {
 		draftStepFamily.remove(step);
 	}
 };
+
+// 草稿转回TestStep
+export function stepFromDraft(draft: DraftStep, base: TestStep): TestStep {
+	return {
+		...base,
+		name: draft.name,
+		type: draft.type,
+		config: draft.config,
+	} as TestStep;
+}
 
 // Step json数据转draft
 export function draftFromStep(step: TestStep): DraftStep {

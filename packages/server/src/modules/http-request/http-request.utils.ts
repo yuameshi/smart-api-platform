@@ -45,7 +45,7 @@ export function buildHeaders(headers: KeyValueEntry[], body: RequestBody, auth: 
 		if (entry.active && key !== '') record[key] = entry.value;
 	}
 	// 用户头不含content-type才注入
-	if (!Object.keys(record).some(existingKey => existingKey.toLowerCase() === 'Content-Type')) {
+	if (!Object.keys(record).some(existingKey => existingKey.toLowerCase() === 'content-type')) {
 		if (body.kind === 'raw') record['Content-Type'] = 'application/json';
 		if (body.kind === 'formUrlEncoded') {
 			record['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -53,7 +53,7 @@ export function buildHeaders(headers: KeyValueEntry[], body: RequestBody, auth: 
 	}
 
 	// 用户头不含authorization才注入
-	if (!Object.keys(record).some(existingKey => existingKey.toLowerCase() === 'Authorization')) {
+	if (!Object.keys(record).some(existingKey => existingKey.toLowerCase() === 'authorization')) {
 		if (auth.kind === 'bearer') record['Authorization'] = `Bearer ${auth.token}`;
 		if (auth.kind === 'basic') {
 			record['Authorization'] = `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}`;
@@ -73,6 +73,37 @@ export function buildBody(body: RequestBody): string | undefined {
 	return undefined;
 }
 
+// 流式读取响应体，但是最多储存1MB
+async function bodyReader(res: Response) {
+	if (!res.body)
+		return {
+			buffer: Buffer.alloc(0),
+			totalBytes: 0,
+		};
+	const reader = res.body.getReader();
+	const chunks: Buffer[] = [];
+	let storedBytes = 0;
+	let totalBytes = 0;
+	while (true) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		totalBytes += value.byteLength;
+		// 只保留前1MB的响应体，超出部分丢弃
+		// 剩余可存储的字节数
+		const remaining = 1024 * 1024 - storedBytes;
+		if (remaining > 0) {
+			const kept = value.subarray(0, remaining);
+			chunks.push(Buffer.from(kept.buffer, kept.byteOffset, kept.byteLength));
+			storedBytes += kept.byteLength;
+		}
+	}
+
+	return {
+		buffer: Buffer.concat(chunks),
+		totalBytes,
+	};
+}
+
 export async function processResponse(res: Response, startTs: number) {
 	const headers: { key: string; value: string }[] = [];
 
@@ -90,36 +121,38 @@ export async function processResponse(res: Response, startTs: number) {
 
 	const contentType = res.headers.get('content-type');
 
-	const durationMs = Math.round(performance.now() - startTs);
-
 	// 判断是不是文本类型
 	const isText =
 		(contentType !== null && /^text\//i.test(contentType)) ||
 		(contentType !== null && /json|xml|javascript|x-www-form-urlencoded|html/i.test(contentType));
 
+	// 流式读取响应
+	const { buffer, totalBytes } = await bodyReader(res);
+
+	// 读完整个流再计时，统计的是含body下载的完整耗时（超出1MB的部分已流式丢弃，不占内存）
+	const durationMs = Math.round(performance.now() - startTs);
+
 	if (isText) {
-		const body = await res.text();
 		return {
 			status: res.status,
 			statusText: res.statusText,
 			headers,
-			body,
+			body: buffer.toString('utf8'),
 			encoding: 'utf8' as const,
 			contentType,
 			durationMs,
-			sizeBytes: Buffer.byteLength(body, 'utf8'),
+			sizeBytes: totalBytes,
 		};
 	} else {
-		const buffer = await res.arrayBuffer();
 		return {
 			status: res.status,
 			statusText: res.statusText,
 			headers,
-			body: Buffer.from(buffer).toString('base64'),
+			body: buffer.toString('base64'),
 			encoding: 'base64' as const,
 			contentType,
 			durationMs,
-			sizeBytes: buffer.byteLength,
+			sizeBytes: totalBytes,
 		};
 	}
 }

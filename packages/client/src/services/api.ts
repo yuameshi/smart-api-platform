@@ -9,6 +9,18 @@ import { API_BASE_URL } from '@/constants/config';
  * 响应拦截器自动提取 data 字段，调用方只需处理业务数据。
  * 错误响应中 data 为 null，错误信息在 message 中。
  */
+
+export function getAuthToken(): string | null {
+	const raw = localStorage.getItem('token');
+	if (!raw) return null;
+	try {
+		return (JSON.parse(raw) as string) || null;
+	} catch {
+		// token 存储格式异常，跳过
+		return null;
+	}
+}
+
 const api = axios.create({
 	baseURL: API_BASE_URL,
 	timeout: 30000,
@@ -20,16 +32,9 @@ const api = axios.create({
 // 自动附加 JWT 认证令牌
 api.interceptors.request.use(
 	config => {
-		const raw = localStorage.getItem('token');
-		if (raw) {
-			try {
-				const token = JSON.parse(raw) as string;
-				if (token) {
-					config.headers.Authorization = `Bearer ${token}`;
-				}
-			} catch {
-				// token 存储格式异常，跳过
-			}
+		const token = getAuthToken();
+		if (token) {
+			config.headers.Authorization = `Bearer ${token}`;
 		}
 		return config;
 	},

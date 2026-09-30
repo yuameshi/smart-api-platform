@@ -1,12 +1,12 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
-import { draftFromStep, draftStepFamily, cleanDraftStep, stringifyDraftStep } from '../draft-steps';
+import { draftFromStep, draftStepFamily, cleanDraftStep, stringifyDraftStep, stepFromDraft } from '../draft-steps';
 import { AssertStepForm } from './AssertStepForm';
 import { RequestStepForm } from './RequestStepForm';
 import { ApiEndpoint } from 'shared';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { ImportApiDialog } from './ImportApiDialog';
 import { PageContext } from '../../PageContext';
-import { StepManagerContext } from '../StepManagerContext';
+import { StepContext } from '../Contexts/StepContext';
 import { useAtom } from 'jotai';
 import { updateTestStep } from '@/services/testSteps';
 import { VariablesPanel } from './VariablesPanel';
@@ -14,8 +14,8 @@ import { VariablesPanel } from './VariablesPanel';
 export const StepEditor = () => {
 	// placeholder
 	const [openImportDialog, setOpenImportDialog] = useState(false);
-	const { projectId } = useContext(PageContext);
-	const { testFlowId, currentStep, setCurrentStep, setStep } = useContext(StepManagerContext);
+	const { projectId, setSnackbar } = useContext(PageContext);
+	const { testFlowId, currentStep, setCurrentStep, setStep } = useContext(StepContext);
 	const draftStepAtom = useMemo(() => draftStepFamily(currentStep?.id ?? -1), [currentStep?.id]);
 	const [draftStep, setDraftStep] = useAtom(draftStepAtom);
 	const [loading, setLoading] = useState(false);
@@ -57,15 +57,22 @@ export const StepEditor = () => {
 	};
 
 	const onSave = async () => {
-		setLoading(true);
 		if (currentStep === null) return;
-		// 清除各种配置里的空行
-		const cleaned = cleanDraftStep(draftStep);
-		await updateTestStep(testFlowId, currentStep.id, cleaned);
-		setDraftStep(cleaned);
-		setStep(currentStep.id, cleaned);
-		setCurrentStep(prev => (prev === null ? null : { ...prev, ...cleaned }));
-		setLoading(false);
+		setLoading(true);
+		try {
+			// 清除各种配置里的空行
+			const cleaned = cleanDraftStep(draftStep);
+			await updateTestStep(testFlowId, currentStep.id, cleaned);
+			setDraftStep(cleaned);
+			const saved = stepFromDraft(cleaned, currentStep);
+			setStep(currentStep.id, saved);
+			setCurrentStep(saved);
+			setSnackbar('保存成功');
+		} catch (error) {
+			setSnackbar(error instanceof Error ? error.message : '保存步骤失败');
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	if (currentStep === null) {
