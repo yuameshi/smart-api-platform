@@ -13,6 +13,7 @@ import { FolderModule } from './modules/folder/folder.module';
 import { EndpointModule } from './modules/endpoint/endpoint.module';
 import { HttpRequestsModule } from './modules/http-request/http-request.module';
 import { TestFlowModule } from './modules/test-flow/test-flow.module';
+import { AgentModule } from './modules/agent/agent.module';
 
 /**
  * 应用根模块
@@ -41,6 +42,7 @@ import { TestFlowModule } from './modules/test-flow/test-flow.module';
 		EndpointModule,
 		HttpRequestsModule,
 		TestFlowModule,
+		AgentModule,
 	],
 })
 export class AppModule implements NestModule {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useParams } from 'react-router';
 import type { TestFlow } from 'shared';
@@ -21,6 +21,8 @@ export default function TestFlowPage() {
 	const [selectedId, setSelectedId] = useState<number | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	// ai写数据后刷新页面后的flag
+	const [aiRefreshTicket, setAiRefreshTicket] = useState(0);
 
 	useEffect(() => {
 		let active = true;
@@ -46,6 +48,22 @@ export default function TestFlowPage() {
 			active = false;
 		};
 	}, [projectIdNumber]);
+
+	// ai用写工具改数据后刷新流程列表
+	const handleAiDataChanged = useCallback(async () => {
+		try {
+			const list = await listTestFlows(projectIdNumber);
+			setFlows(list);
+			if (selectedId != null && !list.some(f => f.id === selectedId)) {
+				// 如果选中的流程刚被删掉则回到占位页
+				setSelectedId(null);
+				return;
+			}
+		} catch {
+			// 列表刷新失败也重新挂载编辑区
+		}
+		setAiRefreshTicket(t => t + 1);
+	}, [projectIdNumber, selectedId]);
 
 	if (loading || error) {
 		return (
@@ -94,10 +112,14 @@ export default function TestFlowPage() {
 							borderColor: 'divider',
 						}}
 					>
-						<TestFlowList />
+						<TestFlowList onAiDataChanged={handleAiDataChanged} />
 					</Box>
 					{selectedId ? (
-						<UiProvider testFlowId={selectedId}>
+						<UiProvider
+							// 使用key强制刷新编辑区
+							key={aiRefreshTicket}
+							testFlowId={selectedId}
+						>
 							<StepProvider testFlowId={selectedId}>
 								<RunProvider testFlowId={selectedId}>
 									<TestFlowEditor />

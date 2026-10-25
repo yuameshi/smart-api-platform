@@ -10,5 +10,6 @@ import { EndpointController } from './endpoint.controller';
 	imports: [TypeOrmModule.forFeature([ApiEndpoint, Folder]), ProjectModule],
 	controllers: [EndpointController],
 	providers: [EndpointService],
+	exports: [EndpointService],
 })
 export class EndpointModule {}

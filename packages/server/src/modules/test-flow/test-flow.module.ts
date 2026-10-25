@@ -15,5 +15,6 @@ import { HttpRequestsModule } from '@/modules/http-request/http-request.module';
 	imports: [TypeOrmModule.forFeature([TestFlow, TestStep, TestFlowRun]), ProjectModule, HttpRequestsModule],
 	controllers: [TestFlowController],
 	providers: [TestFlowService, TestFlowRunnerService, TestFlowRunRecordService, RunEventStream],
+	exports: [TestFlowService],
 })
 export class TestFlowModule {}

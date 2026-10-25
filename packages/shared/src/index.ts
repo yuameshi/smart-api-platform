@@ -39,3 +39,13 @@ export type {
 	TestFlowRun,
 } from './test-flow';
 export { ASSERT_OPERATORS, TEST_STEP_TYPE, TEST_RUN_STATUS } from './test-flow';
+export type {
+	AiChatRole,
+	AiChatStatus,
+	AiStoredMessage,
+	AiMessageInput,
+	AiSessionSummary,
+	AiSessionDetail,
+	CreateAiSessionRequest,
+	AiChatRequestBody,
+} from './ai';
