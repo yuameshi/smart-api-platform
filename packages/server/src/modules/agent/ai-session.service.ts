@@ -47,6 +47,24 @@ export class AiSessionService {
 	// 创建会话
 	async createForUser(projectId: number, userId: number, isAdmin: boolean, title?: string): Promise<AiSessionSummary> {
 		await this.projectService.findOneOwned(projectId, userId, isAdmin);
+
+		// 若有空对话啧复用空对话并更新创建时间
+		const emptySession = await this.sessionRepository
+			.createQueryBuilder('s')
+			.leftJoin('s.messages', 'm')
+			.where('s.projectId = :projectId', { projectId })
+			.andWhere('s.userId = :userId', { userId })
+			.groupBy('s.id')
+			.having('COUNT(m.id) = 0')
+			.orderBy('s.updatedAt', 'DESC')
+			.getOne();
+		if (emptySession) {
+			const updatedAt = new Date();
+			await this.sessionRepository.update(emptySession.id, { updatedAt });
+			emptySession.updatedAt = updatedAt;
+			return this.toSummary(emptySession);
+		}
+
 		const session = await this.sessionRepository.save(
 			this.sessionRepository.create({
 				id: crypto.randomUUID(),
