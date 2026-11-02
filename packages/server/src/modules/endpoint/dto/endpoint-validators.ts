@@ -1,6 +1,20 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
 import type { KeyValueEntry } from 'shared';
 
+function isResponseExample(input: unknown): boolean {
+	if (typeof input !== 'object' || input === null) return false;
+	const object = input as Record<string, unknown>;
+	return (
+		typeof object.statusCode === 'number' &&
+		Number.isInteger(object.statusCode) &&
+		object.statusCode >= 100 &&
+		object.statusCode < 600 &&
+		(object.description === undefined || typeof object.description === 'string') &&
+		(object.contentType === undefined || typeof object.contentType === 'string') &&
+		(object.example === undefined || typeof object.example === 'string')
+	);
+}
+
 function isKeyValueEntry(input: unknown): input is KeyValueEntry {
 	if (typeof input !== 'object' || input === null) return false;
 	const object = input as Record<string, unknown>;
@@ -74,6 +88,25 @@ export function IsAuthConfig(validationOptions?: ValidationOptions) {
 				},
 				defaultMessage(args: ValidationArguments) {
 					return `${args.property}不是合法的AuthConfig`;
+				},
+			},
+		});
+	};
+}
+
+export function IsResponseExampleArray(validationOptions?: ValidationOptions) {
+	return function (object: object, propertyName: string) {
+		registerDecorator({
+			name: 'isResponseExampleArray',
+			target: object.constructor,
+			propertyName,
+			options: validationOptions,
+			validator: {
+				validate(value: unknown) {
+					return Array.isArray(value) && value.every(isResponseExample);
+				},
+				defaultMessage(args: ValidationArguments) {
+					return `${args.property}的每项必须为合法的响应示例`;
 				},
 			},
 		});

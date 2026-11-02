@@ -1,6 +1,6 @@
 import { IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-import type { AuthConfig, HttpMethod, KeyValueEntry, RequestBody, UpdateApiEndpointContentRequest } from 'shared';
-import { IsAuthConfig, IsKeyValueEntryArray, IsRequestBody } from './endpoint-validators';
+import type { AuthConfig, HttpMethod, KeyValueEntry, RequestBody, ResponseExample, UpdateApiEndpointContentRequest } from 'shared';
+import { IsAuthConfig, IsKeyValueEntryArray, IsRequestBody, IsResponseExampleArray } from './endpoint-validators';
 
 export class UpdateEndpointContentDto implements UpdateApiEndpointContentRequest {
 	@IsOptional()
@@ -42,4 +42,8 @@ export class UpdateEndpointContentDto implements UpdateApiEndpointContentRequest
 	@IsOptional()
 	@IsAuthConfig()
 	auth?: AuthConfig | null;
+
+	@IsOptional()
+	@IsResponseExampleArray()
+	responses?: ResponseExample[] | null;
 }

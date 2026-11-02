@@ -92,6 +92,7 @@ export const EndpointEditor: FC<Props> = ({ endpoint }) => {
 			headers: cleaned.headers,
 			requestBody: cleaned.body,
 			auth: cleaned.auth,
+			responses: cleaned.responses,
 		});
 		// 实时刷新端点列表
 		endpointControls.setEndpoints(list =>
@@ -107,6 +108,7 @@ export const EndpointEditor: FC<Props> = ({ endpoint }) => {
 							pathParams,
 							requestBody: cleaned.body,
 							auth: cleaned.auth,
+							responses: cleaned.responses,
 						}
 					: e,
 			),
@@ -159,7 +161,10 @@ export const EndpointEditor: FC<Props> = ({ endpoint }) => {
 					flexDirection: 'column',
 				}}
 			>
-				<ResponseViewer draft={draft} />
+				<ResponseViewer
+					draft={draft}
+					setDraft={setDraft}
+				/>
 			</Box>
 		</Box>
 	);

@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomFamily } from 'jotai-family';
-import type { ApiEndpoint, AuthConfig, HttpMethod, KeyValueEntry, RequestBody, SentHttpResponse } from 'shared';
+import type { ApiEndpoint, AuthConfig, HttpMethod, KeyValueEntry, RequestBody, ResponseExample, SentHttpResponse } from 'shared';
 
 export type EndpointDraft = {
 	endpointId: number;
@@ -15,6 +15,7 @@ export type EndpointDraft = {
 	pathParamEntries: Record<string, Omit<KeyValueEntry, 'key'>>;
 	body: RequestBody;
 	auth: AuthConfig;
+	responses: ResponseExample[];
 	// 记录响应数据
 	sending: boolean;
 	response: SentHttpResponse | null;
@@ -32,6 +33,7 @@ export const draftFamily = atomFamily((endpointId: number) =>
 		pathParamEntries: {},
 		body: { kind: 'none' },
 		auth: { kind: 'none' },
+		responses: [],
 		sending: false,
 		response: null,
 	}),
@@ -61,6 +63,7 @@ export function draftFromEndpoint(e: ApiEndpoint): EndpointDraft {
 		),
 		body: e.requestBody ?? { kind: 'none' },
 		auth: e.auth ?? { kind: 'none' },
+		responses: e.responses ?? [],
 		sending: false,
 		response: null,
 	};
@@ -79,6 +82,7 @@ export const stringifyDraft = (draft: EndpointDraft) =>
 				'pathParamEntries',
 				'body',
 				'auth',
+				'responses',
 			] as const
 		).map(key => draft[key]),
 	);

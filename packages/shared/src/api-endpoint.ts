@@ -11,8 +11,8 @@ export type HttpMethod = (typeof HTTP_METHODS)[number];
 export type ResponseExample = {
 	statusCode: number;
 	description?: string;
-	schema?: unknown;
-	example?: unknown;
+	contentType: string;
+	example: string;
 };
 
 /** API端点类型 */
@@ -61,4 +61,5 @@ export type UpdateApiEndpointContentRequest = {
 	headers?: KeyValueEntry[] | null;
 	requestBody?: RequestBody | null;
 	auth?: AuthConfig | null;
+	responses?: ResponseExample[] | null;
 };
